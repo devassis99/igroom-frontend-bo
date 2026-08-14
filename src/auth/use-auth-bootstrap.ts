@@ -24,8 +24,8 @@ export function useAuthBootstrap() {
       .refresh(refreshToken)
       .then(async (tokens) => {
         useAuthStore.getState().setTokens(tokens);
-        const { user } = await authApi.me(tokens.accessToken);
-        useAuthStore.getState().setUser(user);
+        const { user, role, permissions } = await authApi.me(tokens.accessToken);
+        useAuthStore.getState().setUser(user, role, permissions);
       })
       .catch(() => {
         useAuthStore.getState().clearSession();

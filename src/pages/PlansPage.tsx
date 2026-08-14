@@ -4,6 +4,7 @@ import { StatusPill } from "@/components/ui/StatusPill";
 import { Modal } from "@/components/ui/Modal";
 import { Field, formInputClass } from "@/components/ui/FormField";
 import { billingApi, type BillingInterval } from "@/lib/billing-api";
+import { useAuthStore } from "@/auth/auth-store";
 
 const CYCLE_OPTIONS: { value: BillingInterval; label: string }[] = [
   { value: "month", label: "Monthly" },
@@ -50,23 +51,6 @@ function formatMoney(unitAmountCents: number, currency: string): string {
 
 function errorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
-}
-
-/**
- * Partially masks a Stripe id for display — e.g.
- * "price_1U4NoPDzGKc9rkctZITnu0Yn" -> "price_1U********u0Yn" — so the
- * full id isn't shown at a glance in the table. Left alone (returned
- * as-is) for the "—" placeholder and anything too short to usefully mask.
- */
-function maskId(value: string): string {
-  const visibleStart = 8;
-  const visibleEnd = 4;
-  if (value.length <= visibleStart + visibleEnd) return value;
-
-  const start = value.slice(0, visibleStart);
-  const end = value.slice(-visibleEnd);
-  const maskedLength = Math.min(8, value.length - visibleStart - visibleEnd);
-  return `${start}${"*".repeat(maskedLength)}${end}`;
 }
 
 interface PlanRow {
@@ -423,6 +407,12 @@ function DeleteConfirmModal({
 
 export function PlansPage() {
   const queryClient = useQueryClient();
+  // Server-side, GET /billing/products/admin only needs plans.view (any
+  // logged-in user landing on this tab already has that, or AppShell
+  // wouldn't have let them navigate here) — but the mutating actions
+  // need plans.manage specifically, so hide them for a viewer-only role
+  // rather than letting them click into an action that 403s.
+  const canManage = useAuthStore((s) => s.hasPermission("plans.manage"));
   const [productFilter, setProductFilter] = useState("All Products");
   const [cycleFilter, setCycleFilter] = useState("All Billing Cycles");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
@@ -570,13 +560,15 @@ export function PlansPage() {
             Plans and prices billed via Stripe, mapped to each subscription tier
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setNewProductOpen(true)}
-          className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3.5 py-2 font-sans text-xs font-semibold text-bo-ink-soft"
-        >
-          + New Product
-        </button>
+        {canManage && (
+          <button
+            type="button"
+            onClick={() => setNewProductOpen(true)}
+            className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3.5 py-2 font-sans text-xs font-semibold text-bo-ink-soft"
+          >
+            + New Product
+          </button>
+        )}
       </div>
 
       <div className="mb-3.5 flex gap-2.5">
@@ -639,9 +631,7 @@ export function PlansPage() {
               >
                 <span className="font-sans text-[13px] font-semibold text-bo-ink">{row.product}</span>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.cycle}</span>
-                <span className="font-mono text-[11px] text-bo-muted-4" title={row.priceId}>
-                  {maskId(row.priceId)}
-                </span>
+                <span className="font-mono text-[11px] text-bo-muted-4">{row.priceId}</span>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.price}</span>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.seats}</span>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.trialDays}</span>
@@ -653,7 +643,7 @@ export function PlansPage() {
                   {row.status}
                 </StatusPill>
                 <div className="flex items-center justify-end gap-2.5">
-                  {row.productActive && (
+                  {canManage && row.productActive && (
                     <button
                       type="button"
                       onClick={() =>
@@ -668,7 +658,7 @@ export function PlansPage() {
                       + Price
                     </button>
                   )}
-                  {row.priceDbId !== null && row.status === "Active" && (
+                  {canManage && row.priceDbId !== null && row.status === "Active" && (
                     <button
                       type="button"
                       onClick={() =>
@@ -684,7 +674,7 @@ export function PlansPage() {
                       Delete
                     </button>
                   )}
-                  {row.priceDbId === null && row.status === "No Prices Yet" && (
+                  {canManage && row.priceDbId === null && row.status === "No Prices Yet" && (
                     <button
                       type="button"
                       onClick={() =>

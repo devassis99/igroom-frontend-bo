@@ -1,5 +1,5 @@
 import { request } from "@/lib/http";
-import type { BoUser, GoogleLoginOutcome, MfaSetupDetails, TokenPair } from "./types";
+import type { GoogleLoginOutcome, MeDetails, MfaSetupDetails, TokenPair } from "./types";
 
 /**
  * Thin, 1:1 wrappers around igroom-backend's /auth/* routes
@@ -39,7 +39,7 @@ export const authApi = {
     request<void>("/auth/logout", { method: "POST", body: { refreshToken } }),
 
   me: (accessToken: string) =>
-    request<{ user: BoUser }>("/auth/me", {
+    request<MeDetails>("/auth/me", {
       method: "GET",
       headers: { Authorization: `Bearer ${accessToken}` },
     }),

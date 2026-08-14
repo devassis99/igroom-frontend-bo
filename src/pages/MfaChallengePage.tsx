@@ -36,8 +36,8 @@ export function MfaChallengePage() {
 
     try {
       const tokens = await authApi.verifyMfaChallenge(challengeToken, fullCode);
-      const { user } = await authApi.me(tokens.accessToken);
-      useAuthStore.getState().setSession({ ...tokens, user });
+      const { user, role, permissions } = await authApi.me(tokens.accessToken);
+      useAuthStore.getState().setSession({ ...tokens, user, role, permissions });
       navigate("/", { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Invalid code. Please try again.");

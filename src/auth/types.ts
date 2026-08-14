@@ -5,6 +5,12 @@ export interface BoUser {
   email: string;
 }
 
+/** The current user's role — just enough for display; full role management lives in src/lib/users-api.ts's BoRole. */
+export interface BoRole {
+  id: string;
+  name: string;
+}
+
 export interface TokenPair {
   accessToken: string;
   refreshToken: string;
@@ -18,4 +24,11 @@ export type GoogleLoginOutcome =
 export interface MfaSetupDetails {
   otpAuthUrl: string;
   qrCodeDataUrl: string;
+}
+
+/** Response shape of GET /auth/me — the frontend's source of truth for who's logged in and what they can do. */
+export interface MeDetails {
+  user: BoUser;
+  role: BoRole | null;
+  permissions: string[];
 }
