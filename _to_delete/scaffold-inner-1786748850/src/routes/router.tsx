@@ -60,16 +60,8 @@ export const router = createBrowserRouter([
             lazy: () => import("@/pages/ReferralsPage").then((m) => ({ Component: m.default })),
           },
           {
-            path: "users",
-            lazy: () => import("@/pages/UsersPage").then((m) => ({ Component: m.default })),
-          },
-          {
             path: "settings",
             lazy: () => import("@/pages/SettingsPage").then((m) => ({ Component: m.default })),
-          },
-          {
-            path: "account",
-            lazy: () => import("@/pages/AccountPage").then((m) => ({ Component: m.default })),
           },
         ],
       },

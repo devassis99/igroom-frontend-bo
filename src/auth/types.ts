@@ -1,8 +1,10 @@
-/** Mirrors igroom-backend's req.boUser shape (src/middleware/require-auth.ts). */
+/** Mirrors igroom-backend's req.boUser shape (src/middleware/require-auth.ts), plus mfaEnabled from GET /auth/me. */
 export interface BoUser {
   id: string;
   roleId: string;
   email: string;
+  /** False mid-first-setup, or briefly mid-reset (see AccountPage.tsx's ResetMfaModal). */
+  mfaEnabled: boolean;
 }
 
 /** The current user's role — just enough for display; full role management lives in src/lib/users-api.ts's BoRole. */

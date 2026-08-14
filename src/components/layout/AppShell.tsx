@@ -112,14 +112,14 @@ export function AppShell() {
         <div className="flex-1" />
 
         <div className="flex flex-col gap-2 px-6">
-          <div className="flex items-center gap-2.5">
+          <NavLink to="/account" className="flex items-center gap-2.5" title="Account & two-factor settings">
             <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-bo-dark font-sans text-xs font-semibold text-bo-on-dark">
               {user?.email?.[0]?.toUpperCase() ?? "?"}
             </div>
-            <p className="m-0 truncate font-sans text-xs font-semibold text-bo-ink-soft">
+            <p className="m-0 truncate font-sans text-xs font-semibold text-bo-ink-soft hover:underline">
               {user?.email}
             </p>
-          </div>
+          </NavLink>
           <button
             type="button"
             onClick={handleLogout}
