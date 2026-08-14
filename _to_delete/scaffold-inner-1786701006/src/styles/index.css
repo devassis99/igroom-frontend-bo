@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+/*
+ * Every value below is lifted directly from Backoffice.dc.html (the
+ * Claude Design mockup) rather than approximated — same oklch numbers,
+ * same font stack. Registered via Tailwind v4's @theme so the whole app
+ * gets first-class utilities (bg-bo-surface, text-bo-ink, font-serif,
+ * etc.) instead of scattering raw oklch() calls through components.
+ * Re-theming later means editing values here, not hunting through JSX.
+ */
+@theme {
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Surfaces */
+  --color-bo-page: oklch(93% 0.015 65);
+  --color-bo-surface: oklch(99% 0.005 80);
+  --color-bo-table-head: oklch(96% 0.012 75);
+
+  /* Borders */
+  --color-bo-border: oklch(88% 0.015 60);
+  --color-bo-border-soft: oklch(93% 0.008 65);
+  --color-bo-sidebar-border: oklch(90% 0.01 65);
+  --color-bo-input-border: oklch(85% 0.02 60);
+
+  /* Text — darkest to lightest, names match usage frequency in the mockup */
+  --color-bo-ink: oklch(22% 0.02 50);
+  --color-bo-ink-soft: oklch(28% 0.02 50);
+  --color-bo-muted-1: oklch(38% 0.02 55);
+  --color-bo-muted-2: oklch(42% 0.02 55);
+  --color-bo-muted-3: oklch(48% 0.02 60);
+  --color-bo-muted-4: oklch(50% 0.02 60);
+  --color-bo-muted-5: oklch(55% 0.02 60);
+  --color-bo-muted-6: oklch(58% 0.02 60);
+  --color-bo-faint: oklch(65% 0.02 60);
+  --color-bo-nav-inactive: oklch(40% 0.02 55);
+
+  /* Dark surfaces — active nav item, primary buttons, avatar, loading screen */
+  --color-bo-dark: oklch(30% 0.02 50);
+  --color-bo-on-dark: oklch(98% 0.005 80);
+
+  /* Accent — links, focus rings, chart lines, "in progress" status */
+  --color-bo-gold: oklch(48% 0.09 85);
+  --color-bo-gold-soft: oklch(78% 0.09 85);
+  --color-bo-gold-bg: oklch(78% 0.09 85 / 0.18);
+
+  /* Status */
+  --color-bo-success: oklch(45% 0.15 145);
+  --color-bo-success-bg: oklch(45% 0.15 145 / 0.12);
+  --color-bo-danger: oklch(60% 0.15 25);
+  --color-bo-danger-bg: oklch(60% 0.15 25 / 0.12);
+  --color-bo-warning: oklch(60% 0.13 75);
+  --color-bo-neutral-bg: oklch(93% 0.015 65);
+}
+
+body {
+  background-color: var(--color-bo-page);
+  color: var(--color-bo-ink);
+  font-family: var(--font-sans);
+}
+
+@keyframes bo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

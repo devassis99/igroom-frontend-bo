@@ -1,0 +1,7 @@
+# Vite's dev/build pipeline depends on esbuild's native binary, installed
+# via its postinstall script — unlike igroom-backend (Node-only, no bundler),
+# this project can't run with esbuild's build script blocked. Everything
+# else follows the backend's default (pnpm's secure-by-default script
+# blocking applies to any other dependency that adds a postinstall later).
+allowBuilds:
+  esbuild: true
