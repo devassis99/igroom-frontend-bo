@@ -1,9 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { Modal } from "@/components/ui/Modal";
 import { Field, formInputClass } from "@/components/ui/FormField";
-import { billingApi, type BillingInterval } from "@/lib/billing-api";
+import {
+  billingApi,
+  type BillingInterval,
+  type BillingPaymentLink,
+  type CatalogEntry,
+  type PaymentLinkDiscountType,
+} from "@/lib/billing-api";
 import { useAuthStore } from "@/auth/auth-store";
 
 const CYCLE_OPTIONS: { value: BillingInterval; label: string }[] = [
@@ -60,6 +66,8 @@ interface PlanRow {
   productKey: string;
   /** Whether the parent product is active — false once it's been deleted (archived). Gates "+ Price". */
   productActive: boolean;
+  /** Independent of productActive — whether the product appears in the public self-signup catalog. Same value for every row of a given product; only rendered on the first row (see isFirstProductRow). */
+  showOnSignup: boolean;
   /** Internal DB id for this row's price, or null for a "No Prices Yet" placeholder row. */
   priceDbId: string | null;
   cycle: string;
@@ -335,6 +343,412 @@ function AddPriceModal({ target, onClose }: { target: AddPriceTarget | null; onC
   );
 }
 
+/** Copies an already-known URL — used once a payment link has actually been generated (as opposed to CopyLinkButton, which fetches-or-creates first). */
+function CopyUrlButton({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // No clipboard permission/API — the URL is still visible in the row for a manual copy.
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="whitespace-nowrap rounded-[8px] bg-bo-dark px-3.5 py-2 font-sans text-xs font-semibold text-bo-on-dark"
+    >
+      {copied ? "Copied!" : "Copy Link"}
+    </button>
+  );
+}
+
+function CycleChip({
+  label,
+  selected,
+  disabled,
+  onToggle,
+}: {
+  label: string;
+  selected: boolean;
+  disabled: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      disabled={disabled}
+      className={`flex items-center gap-1.5 rounded-[9px] border px-3 py-2 font-sans text-xs font-medium disabled:cursor-not-allowed disabled:opacity-40 ${
+        selected
+          ? "border-bo-stripe/50 bg-bo-stripe-bg text-bo-stripe"
+          : "border-bo-input-border bg-bo-surface text-bo-ink-soft"
+      }`}
+    >
+      <span
+        className={`h-3.5 w-3.5 shrink-0 rounded ${selected ? "bg-bo-stripe" : "border-[1.5px] border-bo-muted-5"}`}
+      />
+      {label}
+    </button>
+  );
+}
+
+/**
+ * Matches Backoffice.dc.html's B4d frame, wired as the "Create Payment
+ * Link" header action — hits POST /billing/payment-links
+ * (billing.service.ts createPaymentLinks), which creates a real Stripe
+ * Payment Link per selected cycle.
+ *
+ * Three deliberate departures from the static mockup, all because
+ * Stripe's actual API doesn't support what it visually implies:
+ *  - Stripe can't offer a buyer a choice between several prices inside
+ *    one Payment Link, so checking multiple cycles here generates one
+ *    link per cycle (all returned together below), not one link the
+ *    shop picks a cycle within.
+ *  - The link preview box in the mockup shows a URL before you've
+ *    generated anything; a real Stripe URL only exists after creation,
+ *    so this shows the result(s) after "Generate Link" instead of a live
+ *    preview beforehand.
+ *  - A discount can't be pre-applied to a Payment Link (only Checkout
+ *    Sessions support that) — it's redeemed via a Promotion Code the
+ *    shop enters at checkout, shown above the link(s) once generated.
+ */
+function CreatePaymentLinkModal({
+  open,
+  onClose,
+  products,
+}: {
+  open: boolean;
+  onClose: () => void;
+  products: CatalogEntry[];
+}) {
+  const [productId, setProductId] = useState("");
+  const [selectedCycles, setSelectedCycles] = useState<Set<BillingInterval>>(new Set());
+  const [seatOverride, setSeatOverride] = useState("");
+  const [trialDaysOverride, setTrialDaysOverride] = useState("");
+  const [discountType, setDiscountType] = useState<"" | PaymentLinkDiscountType>("");
+  const [discountValue, setDiscountValue] = useState("");
+  const [expiresOption, setExpiresOption] = useState<"never" | "7" | "30">("never");
+  const [results, setResults] = useState<BillingPaymentLink[] | null>(null);
+
+  const eligibleProducts = useMemo(
+    () => products.filter((p) => p.isActive && p.prices.some((price) => price.isActive)),
+    [products],
+  );
+
+  // Default to the first eligible product once one's available — the
+  // catalog usually hasn't loaded yet on first render, so this can't
+  // just be a useState initializer.
+  useEffect(() => {
+    const firstEligible = eligibleProducts[0];
+    if (open && !productId && firstEligible) {
+      setProductId(firstEligible.id);
+    }
+  }, [open, productId, eligibleProducts]);
+
+  const selectedProduct = eligibleProducts.find((p) => p.id === productId) ?? null;
+  const availableCycles = useMemo(
+    () => new Set((selectedProduct?.prices ?? []).filter((p) => p.isActive).map((p) => p.billingInterval)),
+    [selectedProduct],
+  );
+
+  function toggleCycle(cycle: BillingInterval) {
+    setSelectedCycles((prev) => {
+      const next = new Set(prev);
+      if (next.has(cycle)) next.delete(cycle);
+      else next.add(cycle);
+      return next;
+    });
+  }
+
+  const createLinks = useMutation({
+    mutationFn: () => {
+      if (!productId) throw new Error("Choose a product.");
+      if (selectedCycles.size === 0) throw new Error("Pick at least one billing cycle.");
+
+      const seat = seatOverride.trim() ? Number.parseInt(seatOverride, 10) : undefined;
+      if (seat !== undefined && (!Number.isFinite(seat) || seat <= 0)) {
+        throw new Error("Seat override must be a positive whole number.");
+      }
+
+      const trial = trialDaysOverride.trim() ? Number.parseInt(trialDaysOverride, 10) : undefined;
+      if (trial !== undefined && (!Number.isFinite(trial) || trial < 0)) {
+        throw new Error("Trial override must be a non-negative number of days.");
+      }
+
+      let discountValueOut: number | undefined;
+      if (discountType) {
+        const raw = Number.parseFloat(discountValue);
+        if (!Number.isFinite(raw) || raw <= 0) {
+          throw new Error("Enter a discount amount greater than 0.");
+        }
+        if (discountType === "percent" && raw > 100) {
+          throw new Error("A percentage discount can't exceed 100.");
+        }
+        discountValueOut = discountType === "amount" ? Math.round(raw * 100) : raw;
+      }
+
+      return billingApi.createPaymentLinks({
+        productId,
+        billingIntervals: [...selectedCycles],
+        seatOverride: seat,
+        trialDaysOverride: trial,
+        discountType: discountType || undefined,
+        discountValue: discountValueOut,
+        expiresInDays: expiresOption === "never" ? null : Number.parseInt(expiresOption, 10),
+      });
+    },
+    onSuccess: ({ paymentLinks }) => setResults(paymentLinks),
+  });
+
+  function resetForm() {
+    setProductId("");
+    setSelectedCycles(new Set());
+    setSeatOverride("");
+    setTrialDaysOverride("");
+    setDiscountType("");
+    setDiscountValue("");
+    setExpiresOption("never");
+    setResults(null);
+    createLinks.reset();
+  }
+
+  function handleClose() {
+    resetForm();
+    onClose();
+  }
+
+  const canSubmit = productId.length > 0 && selectedCycles.size > 0 && !createLinks.isPending;
+
+  return (
+    <Modal open={open} onClose={handleClose}>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="m-0 mb-1 font-sans text-xl font-semibold text-bo-ink">Create Payment Link</h1>
+          <p className="m-0 font-sans text-xs text-bo-muted-5">
+            Send a shop owner a checkout link with the exact terms you set
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Close"
+          className="font-sans text-xl text-bo-muted-5"
+        >
+          ×
+        </button>
+      </div>
+
+      {results ? (
+        <>
+          <div className="flex flex-col gap-3">
+            {results[0]?.promotionCode && (
+              <div className="flex items-center justify-between rounded-[10px] border border-bo-stripe/30 bg-bo-stripe-bg px-3.5 py-2.5">
+                <span className="font-sans text-xs text-bo-stripe">
+                  Discount code — share this alongside the link(s) below, the shop enters it at
+                  checkout:
+                </span>
+                <span className="font-mono text-xs font-semibold text-bo-stripe">
+                  {results[0].promotionCode}
+                </span>
+              </div>
+            )}
+            {results.map((link) => (
+              <div key={link.id} className="flex flex-col gap-1.5">
+                <span className="font-sans text-xs font-medium text-bo-muted-1">
+                  {CYCLE_LABEL[link.billingInterval]}
+                </span>
+                <div className="flex items-center gap-2.5 rounded-[10px] bg-bo-table-head px-3.5 py-3">
+                  <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-xs text-bo-ink-soft">
+                    {link.url}
+                  </span>
+                  <CopyUrlButton url={link.url} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2.5 pt-1.5">
+            <button type="button" onClick={resetForm} className={modalCancelButtonClass}>
+              Create Another
+            </button>
+            <button type="button" onClick={handleClose} className={modalSubmitButtonClass}>
+              Done
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <Field label="PRODUCT">
+            <select
+              value={productId}
+              onChange={(e) => {
+                setProductId(e.target.value);
+                setSelectedCycles(new Set());
+              }}
+              className={formInputClass}
+            >
+              {eligibleProducts.length === 0 && <option value="">No products with active prices</option>}
+              {eligibleProducts.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <div className="flex flex-col gap-2">
+            <span className="font-sans text-xs font-medium tracking-[0.02em] text-bo-muted-1">
+              BILLING CYCLES TO INCLUDE
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {CYCLE_OPTIONS.map((c) => (
+                <CycleChip
+                  key={c.value}
+                  label={c.label}
+                  selected={selectedCycles.has(c.value)}
+                  disabled={!availableCycles.has(c.value)}
+                  onToggle={() => toggleCycle(c.value)}
+                />
+              ))}
+            </div>
+            <p className="m-0 font-sans text-[11px] text-bo-muted-5">
+              Pick one for a single-offer link, or several to generate one link per cycle — Stripe
+              can't offer a buyer a choice of prices within a single link.
+            </p>
+          </div>
+
+          <div className="flex gap-4">
+            <Field label="SEAT OVERRIDE">
+              <input
+                type="text"
+                placeholder="Default"
+                value={seatOverride}
+                onChange={(e) => setSeatOverride(e.target.value)}
+                className={formInputClass}
+              />
+            </Field>
+            <Field label="TRIAL OVERRIDE (DAYS)">
+              <input
+                type="text"
+                placeholder="Default"
+                value={trialDaysOverride}
+                onChange={(e) => setTrialDaysOverride(e.target.value)}
+                className={formInputClass}
+              />
+            </Field>
+          </div>
+          <p className="-mt-3 m-0 font-sans text-[11px] text-bo-muted-5">
+            Seat override is recorded on the link for reference — it doesn't change what's charged
+            at checkout (a real per-seat quantity would multiply the price).
+          </p>
+
+          <Field label="DISCOUNT">
+            <div className="flex gap-2.5">
+              <select
+                value={discountType}
+                onChange={(e) => {
+                  setDiscountType(e.target.value as "" | PaymentLinkDiscountType);
+                  setDiscountValue("");
+                }}
+                className={`${formInputClass} w-[110px]`}
+              >
+                <option value="">None</option>
+                <option value="percent">% off</option>
+                <option value="amount">$ off</option>
+              </select>
+              <input
+                type="text"
+                placeholder="e.g. 20"
+                value={discountValue}
+                onChange={(e) => setDiscountValue(e.target.value)}
+                disabled={!discountType}
+                className={`${formInputClass} flex-1 disabled:opacity-50`}
+              />
+            </div>
+          </Field>
+
+          <Field label="LINK EXPIRES">
+            <select
+              value={expiresOption}
+              onChange={(e) => setExpiresOption(e.target.value as "never" | "7" | "30")}
+              className={formInputClass}
+            >
+              <option value="never">Never</option>
+              <option value="7">7 days</option>
+              <option value="30">30 days</option>
+            </select>
+          </Field>
+          <p className="-mt-3 m-0 font-sans text-[11px] text-bo-muted-5">
+            Recorded for reference — Stripe's Payment Links don't support automatic expiry, so this
+            isn't enforced yet. Deactivate the link in the Stripe Dashboard once it's past use.
+          </p>
+
+          {createLinks.isError && (
+            <p className="m-0 font-sans text-xs text-bo-danger">
+              {errorMessage(createLinks.error, "Failed to create the payment link.")}
+            </p>
+          )}
+
+          <div className="flex justify-end gap-2.5 pt-1.5">
+            <button type="button" onClick={handleClose} className={modalCancelButtonClass}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => createLinks.mutate()}
+              disabled={!canSubmit}
+              className={modalSubmitButtonClass}
+            >
+              {createLinks.isPending ? "Generating…" : "Generate Link"}
+            </button>
+          </div>
+        </>
+      )}
+    </Modal>
+  );
+}
+
+/**
+ * The price row's "Copy" action (Backoffice.dc.html's LINK column) —
+ * lazily gets-or-creates a plain default payment link for this price
+ * (billing.service.ts getOrCreateDefaultPaymentLink — idempotent, so a
+ * second click by anyone reuses the same Stripe link rather than minting
+ * a new one) and copies the URL straight to the clipboard.
+ */
+function CopyLinkButton({ priceDbId }: { priceDbId: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyLink = useMutation({
+    mutationFn: () => billingApi.getOrCreateDefaultPaymentLink(priceDbId),
+    onSuccess: async ({ paymentLink }) => {
+      try {
+        await navigator.clipboard.writeText(paymentLink.url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      } catch {
+        // No clipboard permission/API — the link itself was still created successfully.
+      }
+    },
+  });
+
+  return (
+    <button
+      type="button"
+      onClick={() => copyLink.mutate()}
+      disabled={copyLink.isPending}
+      title={copyLink.isError ? errorMessage(copyLink.error, "Failed to generate link.") : undefined}
+      className={`font-sans text-xs font-semibold ${copyLink.isError ? "text-bo-danger" : "text-bo-stripe"}`}
+    >
+      {copyLink.isPending ? "…" : copyLink.isError ? "Retry" : copied ? "Copied!" : "🔗 Copy"}
+    </button>
+  );
+}
+
 type DeleteTarget =
   | { kind: "price"; priceDbId: string; product: string; cycle: string }
   | { kind: "product"; productId: string; product: string };
@@ -405,6 +819,40 @@ function DeleteConfirmModal({
   );
 }
 
+/**
+ * A minimal switch built from scratch — this repo has no existing
+ * Toggle/Switch component (only StatusPill and Modal live in
+ * components/ui/). Kept local to this file since it's only used here.
+ */
+function SelfSignupToggle({
+  checked,
+  onChange,
+  disabled,
+}: {
+  checked: boolean;
+  onChange: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={onChange}
+      className={`relative inline-flex h-[18px] w-8 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+        checked ? "bg-bo-gold" : "bg-bo-input-border"
+      }`}
+    >
+      <span
+        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+          checked ? "translate-x-[15px]" : "translate-x-[2px]"
+        }`}
+      />
+    </button>
+  );
+}
+
 export function PlansPage() {
   const queryClient = useQueryClient();
   // Server-side, GET /billing/products/admin only needs plans.view (any
@@ -417,6 +865,7 @@ export function PlansPage() {
   const [cycleFilter, setCycleFilter] = useState("All Billing Cycles");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
   const [newProductOpen, setNewProductOpen] = useState(false);
+  const [createLinkOpen, setCreateLinkOpen] = useState(false);
   const [addPriceTarget, setAddPriceTarget] = useState<AddPriceTarget | null>(null);
 
   // GET /billing/products/admin — every product/price, active or
@@ -447,6 +896,16 @@ export function PlansPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["billing", "admin-catalog"] });
       setDeleteTarget(null);
+    },
+  });
+
+  // Flips a product's self-signup visibility — independent of archiving.
+  // See BillingProduct.showOnSignup's doc comment in billing-api.ts.
+  const updateVisibilityMutation = useMutation({
+    mutationFn: ({ productId, showOnSignup }: { productId: string; showOnSignup: boolean }) =>
+      billingApi.updateProductVisibility(productId, showOnSignup),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["billing", "admin-catalog"] });
     },
   });
 
@@ -498,6 +957,7 @@ export function PlansPage() {
           productId: product.id,
           productKey: product.key,
           productActive: product.isActive,
+          showOnSignup: product.showOnSignup,
           priceDbId: null,
           cycle: "—",
           priceId: "—",
@@ -519,6 +979,7 @@ export function PlansPage() {
           productId: product.id,
           productKey: product.key,
           productActive: product.isActive,
+          showOnSignup: product.showOnSignup,
           priceDbId: price.id,
           cycle: CYCLE_LABEL[price.billingInterval],
           priceId: price.stripePriceId,
@@ -544,6 +1005,7 @@ export function PlansPage() {
     [rows, productFilter, cycleFilter, statusFilter],
   );
 
+
   return (
     <div>
       <h1 className="m-0 mb-5 font-sans text-2xl font-semibold text-bo-ink">Plans</h1>
@@ -561,13 +1023,22 @@ export function PlansPage() {
           </p>
         </div>
         {canManage && (
-          <button
-            type="button"
-            onClick={() => setNewProductOpen(true)}
-            className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3.5 py-2 font-sans text-xs font-semibold text-bo-ink-soft"
-          >
-            + New Product
-          </button>
+          <div className="flex gap-2.5">
+            <button
+              type="button"
+              onClick={() => setCreateLinkOpen(true)}
+              className="rounded-[10px] border border-bo-stripe/40 bg-bo-stripe-bg px-3.5 py-2 font-sans text-xs font-semibold text-bo-stripe"
+            >
+              🔗 Create Payment Link
+            </button>
+            <button
+              type="button"
+              onClick={() => setNewProductOpen(true)}
+              className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3.5 py-2 font-sans text-xs font-semibold text-bo-ink-soft"
+            >
+              + New Product
+            </button>
+          </div>
         )}
       </div>
 
@@ -602,7 +1073,7 @@ export function PlansPage() {
       </div>
 
       <div className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface">
-        <div className="grid grid-cols-[1.1fr_0.9fr_1fr_0.7fr_0.6fr_0.6fr_0.7fr_1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4">
+        <div className="grid grid-cols-[1.1fr_0.9fr_1fr_0.7fr_0.6fr_0.6fr_0.7fr_0.8fr_1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4">
           <span>PRODUCT</span>
           <span>BILLING CYCLE</span>
           <span>PRICE ID</span>
@@ -610,6 +1081,7 @@ export function PlansPage() {
           <span>SEATS</span>
           <span>TRIAL</span>
           <span>STATUS</span>
+          <span>SELF-SIGNUP</span>
           <span />
         </div>
         {catalogQuery.isLoading ? (
@@ -625,13 +1097,24 @@ export function PlansPage() {
             return (
               <div
                 key={row.rowKey}
-                className={`grid grid-cols-[1.1fr_0.9fr_1fr_0.7fr_0.6fr_0.6fr_0.7fr_1fr] items-center px-5 py-2.5 ${
+                className={`grid grid-cols-[1.1fr_0.9fr_1fr_0.7fr_0.6fr_0.6fr_0.7fr_0.8fr_1fr] items-center px-5 py-2.5 ${
                   i > 0 ? "border-t border-bo-border-soft" : ""
                 }`}
               >
                 <span className="font-sans text-[13px] font-semibold text-bo-ink">{row.product}</span>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.cycle}</span>
-                <span className="font-mono text-[11px] text-bo-muted-4">{row.priceId}</span>
+                <button
+                  type="button"
+                  title={row.priceId !== "—" ? `Click to copy: ${row.priceId}` : undefined}
+                  onClick={() => {
+                    if (row.priceId === "—") return;
+                    navigator.clipboard?.writeText(row.priceId).catch(() => {});
+                  }}
+                  disabled={row.priceId === "—"}
+                  className="block w-full min-w-0 truncate pr-2 text-left font-mono text-[11px] text-bo-muted-4 disabled:cursor-default"
+                >
+                  {row.priceId}
+                </button>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.price}</span>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.seats}</span>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.trialDays}</span>
@@ -642,6 +1125,18 @@ export function PlansPage() {
                 >
                   {row.status}
                 </StatusPill>
+                <div>
+                  <SelfSignupToggle
+                    checked={row.showOnSignup}
+                    disabled={!canManage || updateVisibilityMutation.isPending}
+                    onChange={() =>
+                      updateVisibilityMutation.mutate({
+                        productId: row.productId,
+                        showOnSignup: !row.showOnSignup,
+                      })
+                    }
+                  />
+                </div>
                 <div className="flex items-center justify-end gap-2.5">
                   {canManage && row.productActive && (
                     <button
@@ -657,6 +1152,9 @@ export function PlansPage() {
                     >
                       + Price
                     </button>
+                  )}
+                  {canManage && row.priceDbId !== null && row.status === "Active" && (
+                    <CopyLinkButton priceDbId={row.priceDbId} />
                   )}
                   {canManage && row.priceDbId !== null && row.status === "Active" && (
                     <button
@@ -693,6 +1191,11 @@ export function PlansPage() {
       </div>
 
       <NewProductModal open={newProductOpen} onClose={() => setNewProductOpen(false)} />
+      <CreatePaymentLinkModal
+        open={createLinkOpen}
+        onClose={() => setCreateLinkOpen(false)}
+        products={products}
+      />
       <AddPriceModal target={addPriceTarget} onClose={() => setAddPriceTarget(null)} />
       <DeleteConfirmModal
         target={deleteTarget}

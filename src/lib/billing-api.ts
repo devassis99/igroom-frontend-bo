@@ -25,6 +25,8 @@ export interface BillingProduct {
   limits: Record<string, number>;
   trialDays: number;
   isActive: boolean;
+  /** Independent of isActive — whether this plan appears in the public self-signup catalog (GET /billing/products). See billing-products.ts's schema comment. */
+  showOnSignup: boolean;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -43,6 +45,7 @@ export interface CreateProductInput {
   limits?: Record<string, number>;
   trialDays?: number;
   sortOrder?: number;
+  showOnSignup?: boolean;
 }
 
 export interface CreatePriceInput {
@@ -50,6 +53,38 @@ export interface CreatePriceInput {
   unitAmount: number;
   currency?: string;
   trialDaysOverride?: number;
+}
+
+export type PaymentLinkDiscountType = "percent" | "amount";
+
+export interface BillingPaymentLink {
+  id: string;
+  productId: string;
+  priceId: string;
+  billingInterval: BillingInterval;
+  url: string;
+  isDefault: boolean;
+  /** Metadata only — see billing.service.ts's createPaymentLinks doc comment. Not a checkout quantity. */
+  seatOverride: number | null;
+  trialDaysOverride: number | null;
+  discountType: PaymentLinkDiscountType | null;
+  discountValue: number | null;
+  /** The buyer enters this at checkout to redeem the discount — Stripe Payment Links can't apply a coupon automatically. Null unless a discount was set. */
+  promotionCode: string | null;
+  /** Record-keeping only today — nothing auto-deactivates the Stripe link once this passes. */
+  expiresAt: string | null;
+  isActive: boolean;
+}
+
+export interface CreatePaymentLinkInput {
+  productId: string;
+  /** One link per cycle listed — see BillingPaymentLink's doc comment. */
+  billingIntervals: BillingInterval[];
+  seatOverride?: number;
+  trialDaysOverride?: number;
+  discountType?: PaymentLinkDiscountType;
+  discountValue?: number;
+  expiresInDays?: number | null;
 }
 
 /**
@@ -75,6 +110,12 @@ export const billingApi = {
       method: "PATCH",
     }),
 
+  updateProductVisibility: (productId: string, showOnSignup: boolean) =>
+    apiRequest<{ product: BillingProduct }>(`/billing/products/${productId}/visibility`, {
+      method: "PATCH",
+      body: { showOnSignup },
+    }),
+
   createPrice: (productId: string, input: CreatePriceInput) =>
     apiRequest<{ price: BillingPrice }>(`/billing/products/${productId}/prices`, {
       method: "POST",
@@ -84,5 +125,18 @@ export const billingApi = {
   archivePrice: (priceId: string) =>
     apiRequest<{ price: BillingPrice }>(`/billing/prices/${priceId}/archive`, {
       method: "PATCH",
+    }),
+
+  /** "Create Payment Link" modal — may return more than one link (one per selected cycle). */
+  createPaymentLinks: (input: CreatePaymentLinkInput) =>
+    apiRequest<{ paymentLinks: BillingPaymentLink[] }>("/billing/payment-links", {
+      method: "POST",
+      body: input,
+    }),
+
+  /** The price row's "Copy" action — idempotent, reuses the existing default link if there is one. */
+  getOrCreateDefaultPaymentLink: (priceId: string) =>
+    apiRequest<{ paymentLink: BillingPaymentLink }>(`/billing/prices/${priceId}/payment-link`, {
+      method: "POST",
     }),
 };
