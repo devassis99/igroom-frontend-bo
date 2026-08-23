@@ -100,6 +100,33 @@ change plan (re-points `accounts.price_id`; no Stripe call, since checkout is st
 edit details including the marketplace listing. Every one of those is independently gated
 server-side, so hiding a button here is a UX nicety rather than the enforcement.
 
+**A shop's own page.** Clicking a shop name in the table goes to `/shops/:shopId`
+(`ShopDetailPage.tsx`) rather than opening a dialog over the list. The record is too big for a
+modal — five staff and two locations already meant scrolling a ~700px dialog to reach the
+actions at the bottom, and a stray backdrop click threw the whole view away. As a route it's
+linkable, bookmarkable, and the back button does the obvious thing. It's split into five tabs
+(Overview, Locations, Staff, Plan & Billing, Support), with the active one held in the query
+string (`?tab=staff`) so a reload or a pasted link lands where you left off. `Edit details` and
+`Change status` sit in the page header; `Change plan` lives in the Plan & Billing tab, next to
+what it changes. The list page keeps one inline action — the status shortcut — because that's
+the thing people do straight off a list without needing the full record.
+
+The three action dialogs moved to `src/components/shops/ShopActionModals.tsx` so the list and
+the detail page can both open them without either importing the other.
+
+**Support sessions.** The shop page's Support tab carries a "Sign in as this shop" action
+(`src/components/shops/SupportSessionSection.tsx`, gated on `shops.impersonate`), which mints
+a single-use ticket and opens the shop's own tenant app in a new tab, signed in as their
+Owner — or as a specific staff member, when the bug being chased is permission-shaped. The
+session is **read-only**: igroom-backend refuses every non-GET on a support token at the
+middleware layer, so this is enforced by the API rather than by hiding buttons. The link is
+deliberately not auto-opened via `window.open()` — that call lands after an `await`, which
+popup blockers swallow, and because the ticket is single-use an auto-open that *did* work
+plus an operator who also clicks would burn the ticket. Underneath the button is the audit
+trail of every session ever started on that shop, visible to anyone with `shops.view` rather
+than only to operators who can start one — a log only deters if the people who can't use the
+feature can still read it.
+
 Two things worth knowing about that page's data model. `account_status` gained a `past_due` value
 (migration `0020_add_account_past_due_status.sql`) so the mockup's Past Due pill means something
 real and distinct from an admin-side `suspended` — nothing sets it automatically yet, since the

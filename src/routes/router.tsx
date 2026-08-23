@@ -39,6 +39,15 @@ export const router = createBrowserRouter([
             path: "shops",
             lazy: () => import("@/pages/ShopsPage").then((m) => ({ Component: m.default })),
           },
+          // One shop's full record. A sibling route rather than a child of
+          // "shops" — it replaces the list rather than rendering inside it,
+          // and AppShell's nav gate still matches it to the Shops tab
+          // (see matchesNavItem's startsWith check), so shops.view covers
+          // both without a second entry in NAV_ITEMS.
+          {
+            path: "shops/:shopId",
+            lazy: () => import("@/pages/ShopDetailPage").then((m) => ({ Component: m.default })),
+          },
           {
             path: "plans",
             lazy: () => import("@/pages/PlansPage").then((m) => ({ Component: m.default })),

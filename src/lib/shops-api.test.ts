@@ -1,13 +1,20 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-const { apiRequest } = vi.hoisted(() => ({ apiRequest: vi.fn(async () => ({})) }));
+// The `path` param has to be declared even though the stub ignores it —
+// without it the mock's call tuple is typed `[]` and lastPath() below
+// can't index into it.
+const { apiRequest } = vi.hoisted(() => ({
+  apiRequest: vi.fn(async (_path: string, _options?: unknown) => ({})),
+}));
 vi.mock("./api-client", () => ({ apiRequest }));
 
 import { formatCents, shopsApi } from "./shops-api";
 
 /** The path the last shopsApi call passed to apiRequest. */
 function lastPath(): string {
-  return apiRequest.mock.calls.at(-1)?.[0] as unknown as string;
+  const call = apiRequest.mock.calls.at(-1);
+  if (!call) throw new Error("apiRequest was never called");
+  return call[0];
 }
 
 describe("shopsApi.list query building", () => {

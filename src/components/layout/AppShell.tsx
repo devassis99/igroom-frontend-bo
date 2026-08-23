@@ -90,7 +90,12 @@ export function AppShell() {
             <NavLink
               key={item.to}
               to={item.to}
-              end
+              // Exact matching only for "/", which would otherwise match
+              // every route. Everything else stays highlighted on its own
+              // sub-routes — /shops/:shopId keeps Shops lit up, which is
+              // the same rule matchesNavItem above uses for the permission
+              // gate, so the two can't disagree about which tab you're on.
+              end={item.to === "/"}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-6 py-2.5 font-sans text-[13px] ${
                   isActive
