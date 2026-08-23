@@ -82,12 +82,30 @@ All nine sidebar sections from the mockup (B1–B8, with Billing & Plans since s
 Overview, Usage & Notifications, Shops/Accounts, Plans, Billing, Bookings & Waitlist, Support
 Tickets, Referrals & Rewards, Platform Settings) are built out — stat cards, charts
 (`MiniLineChart.tsx`, `DonutChart.tsx`), tables, and the settings list all match their frames.
-Every number on every page is the mockup's own illustrative data (shared shop list lives in
-`src/lib/sample-data.ts` so Overview and Shops/Accounts, which show the same 4 shops in the
-mockup, don't drift from each other) — none of it is live, since igroom-backend doesn't have
-metrics/shops/billing/support endpoints yet. The Shops/Accounts search box does filter the sample
-list client-side as a small bit of real behavior; Platform Settings' rows are inert (no target
-screens exist to link to).
+Shops/Accounts and the shop-derived half of Overview are live (see below); the remaining pages
+still show the mockup's own illustrative figures, since igroom-backend has no
+metrics/usage/support endpoints behind them yet, and each of those is labelled as sample data on
+the page itself. `src/lib/sample-data.ts` is what's left of that — just the Plans price table now.
+Platform Settings' rows are still inert (no target screens exist to link to).
+
+**Shops / Accounts** (`ShopsPage.tsx` + `src/lib/shops-api.ts`) is wired end to end to
+igroom-backend's `/shops/*` routes (`src/modules/shops`). Search, status/plan filtering, sorting
+and paging are all server round trips rather than client-side array work: seats (active staff)
+and MRR (price ÷ billing cadence) are computed in SQL, so filtering or sorting one page of 25 in
+the browser would give the wrong answer for every other page. `keepPreviousData` holds the last
+result while the next loads, so typing in the search box doesn't blank the table. Clicking a shop
+name opens a detail panel — locations, staff roster, booking activity — and, for a role with
+`shops.manage`, three actions: change status (suspend / reinstate / mark past due / cancel),
+change plan (re-points `accounts.price_id`; no Stripe call, since checkout is still mocked), and
+edit details including the marketplace listing. Every one of those is independently gated
+server-side, so hiding a button here is a UX nicety rather than the enforcement.
+
+Two things worth knowing about that page's data model. `account_status` gained a `past_due` value
+(migration `0020_add_account_past_due_status.sql`) so the mockup's Past Due pill means something
+real and distinct from an admin-side `suspended` — nothing sets it automatically yet, since the
+Stripe webhook that should own it doesn't exist, so the back office's manual status change is the
+stopgap. And MRR is always the monthly *equivalent*: an annual plan is divided by 12, so a
+quarterly and a monthly shop can sit in the same column and the same SUM.
 
 **Plans** (`PlansPage.tsx`) owns Stripe product/price management — a filterable table (by
 product, billing cycle, status) plus three modals: "New Product" (`Modal.tsx`, reused wherever a
@@ -111,9 +129,11 @@ a mockup authoring artifact rather than an intentional per-page redesign — Bil
 
 ## Still to do
 
-- Wire each page's sample data up to a real backend endpoint as those endpoints get built —
-  every page is structured to swap in a TanStack Query hook (see `src/lib/query-client.ts`)
-  in place of its `SAMPLE_*`/hardcoded rows.
-- Role-aware navigation/route guards — `bo_roles`/`bo_permissions` exist on the backend already
-  but nothing here reads them yet; right now every authenticated user sees every sidebar item.
+- Wire the remaining pages' sample data up to real backend endpoints as those get built —
+  Shops/Accounts is the worked example (`shops-api.ts` + `ShopsPage.tsx`); every other page is
+  structured the same way, ready to swap a TanStack Query hook (see `src/lib/query-client.ts`)
+  in for its `SAMPLE_*`/hardcoded rows.
+- Overview's revenue/bookings/churn/support tiles and both charts are still the mockup's numbers —
+  they need a metrics endpoint, which is a different shape of query from `/shops/summary`
+  (time series, not a point-in-time roll-up).
 - Platform Settings' five rows need actual destination screens.
