@@ -290,6 +290,7 @@ export function SupportSessionSection({
                   {session.boUserName}
                   <span className="ml-1.5 font-sans text-[10px] font-medium text-bo-muted-5">
                     as {session.staffUserName}
+                    {session.staffRoleName ? ` · ${session.staffRoleName}` : ""}
                   </span>
                 </span>
                 <span className="truncate font-sans text-[11px] text-bo-muted-5">

@@ -34,6 +34,8 @@ export interface SupportSessionAuditEntry {
   boUserEmail: string;
   staffUserName: string;
   staffUserEmail: string;
+  /** The assumed staff member's role — what the session could actually see. Read live, so it reflects that member's role now, not at the time. Null if they have none. */
+  staffRoleName: string | null;
   reason: string | null;
   startedAt: string;
   redeemedAt: string | null;
