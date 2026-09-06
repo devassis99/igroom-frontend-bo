@@ -361,14 +361,14 @@ interface DeleteRoleTarget {
  */
 function RoleFormModal({
   mode,
-  role,
+  boRole,
   open,
   onClose,
   permissionCatalog,
 }: {
   mode: "create" | "edit";
   /** Required when mode === "edit". */
-  role: BoRole | null;
+  boRole: BoRole | null;
   open: boolean;
   onClose: () => void;
   permissionCatalog: PermissionCatalogEntry[];
@@ -382,12 +382,12 @@ function RoleFormModal({
   // (possibly different) role — cheaper and simpler than syncing via
   // useEffect since this only needs to run at open time.
   const [lastOpenedFor, setLastOpenedFor] = useState<string | null>(null);
-  const openKey = open ? (mode === "edit" ? (role?.id ?? "new") : "new") : null;
+  const openKey = open ? (mode === "edit" ? (boRole?.id ?? "new") : "new") : null;
   if (open && openKey !== lastOpenedFor) {
     setLastOpenedFor(openKey);
-    setName(mode === "edit" ? (role?.name ?? "") : "");
-    setDescription(mode === "edit" ? (role?.description ?? "") : "");
-    setSelectedKeys(mode === "edit" ? (role?.permissions ?? []) : []);
+    setName(mode === "edit" ? (boRole?.name ?? "") : "");
+    setDescription(mode === "edit" ? (boRole?.description ?? "") : "");
+    setSelectedKeys(mode === "edit" ? (boRole?.permissions ?? []) : []);
   }
 
   const save = useMutation({
@@ -395,8 +395,8 @@ function RoleFormModal({
       if (mode === "create") {
         return rolesApi.create({ name: name.trim(), description: description.trim() || undefined, permissionKeys: selectedKeys });
       }
-      if (!role) throw new Error("No role selected.");
-      return rolesApi.updatePermissions(role.id, selectedKeys);
+      if (!boRole) throw new Error("No role selected.");
+      return rolesApi.updatePermissions(boRole.id, selectedKeys);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
@@ -419,7 +419,7 @@ function RoleFormModal({
     <Modal open={open} onClose={handleClose}>
       <div className="flex items-start justify-between">
         <h1 className="m-0 font-sans text-xl font-semibold text-bo-ink">
-          {mode === "create" ? "New Role" : `Edit "${role?.name}" permissions`}
+          {mode === "create" ? "New Role" : `Edit "${boRole?.name}" permissions`}
         </h1>
         <button type="button" onClick={handleClose} aria-label="Close" className="font-sans text-xl text-bo-muted-5">
           ×
@@ -642,14 +642,14 @@ function RolesTab({
 
       <RoleFormModal
         mode="create"
-        role={null}
+        boRole={null}
         open={newRoleOpen}
         onClose={() => setNewRoleOpen(false)}
         permissionCatalog={permissionCatalog}
       />
       <RoleFormModal
         mode="edit"
-        role={editTarget}
+        boRole={editTarget}
         open={editTarget !== null}
         onClose={() => setEditTarget(null)}
         permissionCatalog={permissionCatalog}

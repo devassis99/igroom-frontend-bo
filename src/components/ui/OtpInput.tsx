@@ -65,6 +65,9 @@ export function OtpInput({ value, onChange, onComplete, disabled }: OtpInputProp
           inputMode="numeric"
           autoComplete={index === 0 ? "one-time-code" : "off"}
           maxLength={1}
+          // A one-time-code screen exists to be typed into; landing the caret
+          // on the first digit is the point, not a surprise.
+          // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus={index === 0}
           aria-label={`Digit ${index + 1} of ${LENGTH}`}
           className="h-[52px] w-11 rounded-[10px] border border-bo-input-border bg-bo-surface text-center font-sans text-[22px] font-semibold text-bo-ink outline-none focus:border-2 focus:border-bo-gold disabled:opacity-50"

@@ -30,13 +30,23 @@ export function Modal({ open, onClose, children }: ModalProps) {
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-bo-backdrop p-5 backdrop-blur-[6px]"
-      onClick={onClose}
+      // Closes only on a click that landed on the backdrop itself. The card
+      // used to stopPropagation instead, which meant the card carried a
+      // click handler it never needed — and read as an interactive element
+      // to anything inspecting the tree.
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       role="presentation"
     >
+      {/* Not a <dialog>: that element's UA styles (position, margin, border)
+          fight the flex centering above, and showModal() would duplicate the
+          backdrop this component already draws. Escape is handled in the
+          effect above. */}
       <div
+        // eslint-disable-next-line jsx-a11y/prefer-tag-over-role
         role="dialog"
         aria-modal="true"
-        onClick={(e) => e.stopPropagation()}
         className="flex max-h-full w-[480px] flex-col gap-5 overflow-y-auto rounded-2xl bg-bo-surface p-8"
         style={{ boxShadow: "0 30px 70px -20px rgba(20,15,5,0.5)" }}
       >

@@ -828,16 +828,20 @@ function SelfSignupToggle({
   checked,
   onChange,
   disabled,
+  label,
 }: {
   checked: boolean;
   onChange: () => void;
   disabled?: boolean;
+  /** The switch renders no text of its own, so this names what it toggles. */
+  label: string;
 }) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label={label}
       disabled={disabled}
       onClick={onChange}
       className={`relative inline-flex h-[18px] w-8 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -924,7 +928,10 @@ export function PlansPage() {
     }
   }
 
-  const products = catalogQuery.data?.products ?? [];
+  // `?? []` allocates a new array on every render while the query is
+  // still loading, which would make every useMemo keyed on `products`
+  // below re-run on every render. Memoised so the identity is stable.
+  const products = useMemo(() => catalogQuery.data?.products ?? [], [catalogQuery.data]);
 
   const productFilterOptions = useMemo(
     () => ["All Products", ...products.map((p) => p.name)],
@@ -1127,6 +1134,7 @@ export function PlansPage() {
                 </StatusPill>
                 <div>
                   <SelfSignupToggle
+                    label={`Show ${row.product} on the self-signup page`}
                     checked={row.showOnSignup}
                     disabled={!canManage || updateVisibilityMutation.isPending}
                     onChange={() =>
