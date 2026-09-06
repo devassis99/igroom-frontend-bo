@@ -20,3 +20,6 @@ dist-ssr/
 # Test / build artifacts
 coverage/
 stats.html
+
+# Scratch copies of the original scaffold. Kept on disk, out of the repo.
+_to_delete/
