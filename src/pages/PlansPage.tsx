@@ -66,7 +66,7 @@ interface PlanRow {
   productKey: string;
   /** Whether the parent product is active — false once it's been deleted (archived). Gates "+ Price". */
   productActive: boolean;
-  /** Independent of productActive — whether the product appears in the public self-signup catalog. Same value for every row of a given product; only rendered on the first row (see isFirstProductRow). */
+  /** Independent of status — whether this row's price appears in the public self-signup catalog. Per price, so each cycle toggles on its own. False on a "No Prices Yet" placeholder row (there's nothing to show). */
   showOnSignup: boolean;
   /** Internal DB id for this row's price, or null for a "No Prices Yet" placeholder row. */
   priceDbId: string | null;
@@ -903,11 +903,12 @@ export function PlansPage() {
     },
   });
 
-  // Flips a product's self-signup visibility — independent of archiving.
-  // See BillingProduct.showOnSignup's doc comment in billing-api.ts.
+  // Flips one price's self-signup visibility — independent of archiving,
+  // and of the product's other prices. See BillingPrice.showOnSignup's
+  // doc comment in billing-api.ts.
   const updateVisibilityMutation = useMutation({
-    mutationFn: ({ productId, showOnSignup }: { productId: string; showOnSignup: boolean }) =>
-      billingApi.updateProductVisibility(productId, showOnSignup),
+    mutationFn: ({ priceId, showOnSignup }: { priceId: string; showOnSignup: boolean }) =>
+      billingApi.updatePriceVisibility(priceId, showOnSignup),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["billing", "admin-catalog"] });
     },
@@ -964,7 +965,7 @@ export function PlansPage() {
           productId: product.id,
           productKey: product.key,
           productActive: product.isActive,
-          showOnSignup: product.showOnSignup,
+          showOnSignup: false,
           priceDbId: null,
           cycle: "—",
           priceId: "—",
@@ -986,7 +987,7 @@ export function PlansPage() {
           productId: product.id,
           productKey: product.key,
           productActive: product.isActive,
-          showOnSignup: product.showOnSignup,
+          showOnSignup: price.showOnSignup,
           priceDbId: price.id,
           cycle: CYCLE_LABEL[price.billingInterval],
           priceId: price.stripePriceId,
@@ -1133,17 +1134,20 @@ export function PlansPage() {
                   {row.status}
                 </StatusPill>
                 <div>
-                  <SelfSignupToggle
-                    label={`Show ${row.product} on the self-signup page`}
-                    checked={row.showOnSignup}
-                    disabled={!canManage || updateVisibilityMutation.isPending}
-                    onChange={() =>
-                      updateVisibilityMutation.mutate({
-                        productId: row.productId,
-                        showOnSignup: !row.showOnSignup,
-                      })
-                    }
-                  />
+                  {row.priceDbId !== null && (
+                    <SelfSignupToggle
+                      label={`Show ${row.product} ${row.cycle} on the self-signup page`}
+                      checked={row.showOnSignup}
+                      disabled={!canManage || updateVisibilityMutation.isPending}
+                      onChange={() => {
+                        if (row.priceDbId === null) return;
+                        updateVisibilityMutation.mutate({
+                          priceId: row.priceDbId,
+                          showOnSignup: !row.showOnSignup,
+                        });
+                      }}
+                    />
+                  )}
                 </div>
                 <div className="flex items-center justify-end gap-2.5">
                   {canManage && row.productActive && (

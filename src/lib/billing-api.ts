@@ -11,6 +11,8 @@ export interface BillingPrice {
   currency: string;
   trialDaysOverride: number | null;
   isActive: boolean;
+  /** Independent of isActive — whether this price appears in the public self-signup catalog (GET /billing/products). Per price, so each billing cycle of a plan toggles on its own. See billing-prices.ts's schema comment. */
+  showOnSignup: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -25,8 +27,6 @@ export interface BillingProduct {
   limits: Record<string, number>;
   trialDays: number;
   isActive: boolean;
-  /** Independent of isActive — whether this plan appears in the public self-signup catalog (GET /billing/products). See billing-products.ts's schema comment. */
-  showOnSignup: boolean;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -45,7 +45,6 @@ export interface CreateProductInput {
   limits?: Record<string, number>;
   trialDays?: number;
   sortOrder?: number;
-  showOnSignup?: boolean;
 }
 
 export interface CreatePriceInput {
@@ -110,8 +109,8 @@ export const billingApi = {
       method: "PATCH",
     }),
 
-  updateProductVisibility: (productId: string, showOnSignup: boolean) =>
-    apiRequest<{ product: BillingProduct }>(`/billing/products/${productId}/visibility`, {
+  updatePriceVisibility: (priceId: string, showOnSignup: boolean) =>
+    apiRequest<{ price: BillingPrice }>(`/billing/prices/${priceId}/visibility`, {
       method: "PATCH",
       body: { showOnSignup },
     }),
