@@ -915,13 +915,55 @@ export function PlansPage() {
   // Flips one price's self-signup visibility — independent of archiving,
   // and of the product's other prices. See BillingPrice.showOnSignup's
   // doc comment in billing-api.ts.
+  //
+  // Optimistic and per-row: the switch flips the moment it's clicked, and
+  // only *that* row's switch is locked while its request is in flight.
+  // One shared `isPending` used to lock every switch on the page for the
+  // whole round trip, so toggling three cadences meant waiting out three
+  // requests one after another.
+  const [savingPriceIds, setSavingPriceIds] = useState<ReadonlySet<string>>(() => new Set());
   const updateVisibilityMutation = useMutation({
+    mutationKey: ["billing", "price-visibility"],
     mutationFn: ({ priceId, showOnSignup }: { priceId: string; showOnSignup: boolean }) =>
       billingApi.updatePriceVisibility(priceId, showOnSignup),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["billing", "admin-catalog"] });
+    onMutate: async ({ priceId, showOnSignup }) => {
+      setSavingPriceIds((prev) => new Set(prev).add(priceId));
+      // A refetch landing mid-flight would briefly paint the old value back.
+      await queryClient.cancelQueries({ queryKey: ["billing", "admin-catalog"] });
+      setPriceVisibility(priceId, showOnSignup);
+    },
+    // Undo just this price, not a whole-cache snapshot — a snapshot taken
+    // here would also roll back any other row toggled in the meantime.
+    onError: (_error, { priceId, showOnSignup }) => setPriceVisibility(priceId, !showOnSignup),
+    onSettled: (_data, _error, { priceId }) => {
+      setSavingPriceIds((prev) => {
+        const next = new Set(prev);
+        next.delete(priceId);
+        return next;
+      });
+      // Resync with the server once the last in-flight toggle lands, not
+      // after each one — an early refetch would return before the others'
+      // writes and flip their switches back for a moment.
+      if (queryClient.isMutating({ mutationKey: ["billing", "price-visibility"] }) <= 1) {
+        void queryClient.invalidateQueries({ queryKey: ["billing", "admin-catalog"] });
+      }
     },
   });
+
+  function setPriceVisibility(priceId: string, showOnSignup: boolean) {
+    queryClient.setQueryData<{ products: CatalogEntry[] }>(["billing", "admin-catalog"], (old) =>
+      old
+        ? {
+            products: old.products.map((product) => ({
+              ...product,
+              prices: product.prices.map((price) =>
+                price.id === priceId ? { ...price, showOnSignup } : price,
+              ),
+            })),
+          }
+        : old,
+    );
+  }
 
   function closeDeleteModal() {
     setDeleteTarget(null);
@@ -1147,7 +1189,7 @@ export function PlansPage() {
                     <SelfSignupToggle
                       label={`Show ${row.product} ${row.cycle} on the self-signup page`}
                       checked={row.showOnSignup}
-                      disabled={!canManage || updateVisibilityMutation.isPending}
+                      disabled={!canManage || savingPriceIds.has(row.priceDbId)}
                       onChange={() => {
                         if (row.priceDbId === null) return;
                         updateVisibilityMutation.mutate({
