@@ -715,10 +715,15 @@ function CreatePaymentLinkModal({
 
 /**
  * The price row's "Copy" action (Backoffice.dc.html's LINK column) —
- * lazily gets-or-creates a plain default payment link for this price
- * (billing.service.ts getOrCreateDefaultPaymentLink — idempotent, so a
- * second click by anyone reuses the same Stripe link rather than minting
- * a new one) and copies the URL straight to the clipboard.
+ * lazily gets-or-creates this price's signup link (payment-links.service
+ * .ts getOrCreateDefaultPaymentLink — idempotent, so a second click by
+ * anyone reuses the same link) and copies the URL straight to the
+ * clipboard.
+ *
+ * The URL is the tenant app's `/join/<token>`, not a Stripe Payment
+ * Link: the shop that opens it goes through the normal self-signup
+ * (account, business details, availability) with this price already
+ * chosen, pays at Stripe Checkout, and ends up with a real account.
  */
 function CopyLinkButton({ priceDbId }: { priceDbId: string }) {
   const [copied, setCopied] = useState(false);
@@ -741,7 +746,11 @@ function CopyLinkButton({ priceDbId }: { priceDbId: string }) {
       type="button"
       onClick={() => copyLink.mutate()}
       disabled={copyLink.isPending}
-      title={copyLink.isError ? errorMessage(copyLink.error, "Failed to generate link.") : undefined}
+      title={
+        copyLink.isError
+          ? errorMessage(copyLink.error, "Failed to generate link.")
+          : "Copy a signup link for this plan — the shop signs up with this price already chosen"
+      }
       className={`font-sans text-xs font-semibold ${copyLink.isError ? "text-bo-danger" : "text-bo-stripe"}`}
     >
       {copyLink.isPending ? "…" : copyLink.isError ? "Retry" : copied ? "Copied!" : "🔗 Copy"}

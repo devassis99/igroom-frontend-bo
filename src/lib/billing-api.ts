@@ -61,7 +61,9 @@ export interface BillingPaymentLink {
   productId: string;
   priceId: string;
   billingInterval: BillingInterval;
+  /** A tenant-app signup link (/join/<token>) when `token` is set — what "Copy" hands out — otherwise a Stripe Payment Link (the "Create Payment Link" modal). */
   url: string;
+  token: string | null;
   isDefault: boolean;
   /** Metadata only — see billing.service.ts's createPaymentLinks doc comment. Not a checkout quantity. */
   seatOverride: number | null;
@@ -133,7 +135,7 @@ export const billingApi = {
       body: input,
     }),
 
-  /** The price row's "Copy" action — idempotent, reuses the existing default link if there is one. */
+  /** The price row's "Copy" action — a tenant-app signup link (/join/<token>) for this price. Idempotent, reuses the existing one if there is one. */
   getOrCreateDefaultPaymentLink: (priceId: string) =>
     apiRequest<{ paymentLink: BillingPaymentLink }>(`/billing/prices/${priceId}/payment-link`, {
       method: "POST",
