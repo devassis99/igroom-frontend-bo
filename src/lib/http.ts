@@ -46,10 +46,21 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   const payload = isJson ? await response.json().catch(() => undefined) : undefined;
 
   if (!response.ok) {
+    // igroom-backend's errorHandler shapes failures as `{ error: string }`,
+    // not `{ message: string }` — reading only `message` meant every error
+    // here fell back to "Request to … failed with status 401", hiding
+    // messages like "Invalid authentication code" or "Too many wrong
+    // codes. Try again in 15 minutes." Same fix as the tenant app's
+    // http.ts; `message` is still read as a fallback.
+    const payloadMessage =
+      payload && typeof payload === "object"
+        ? ((payload as { error?: unknown; message?: unknown }).error ??
+          (payload as { error?: unknown; message?: unknown }).message)
+        : undefined;
     const message =
-      (payload && typeof payload === "object" && "message" in payload
-        ? String((payload as { message?: unknown }).message)
-        : undefined) ?? `Request to ${path} failed with status ${response.status}`;
+      typeof payloadMessage === "string" && payloadMessage.length > 0
+        ? payloadMessage
+        : `Request to ${path} failed with status ${response.status}`;
     throw new ApiError(response.status, message, payload);
   }
 
