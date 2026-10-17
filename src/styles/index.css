@@ -58,6 +58,24 @@
 
   /* Modal backdrop, B4b */
   --color-bo-backdrop: oklch(20% 0.01 50 / 0.45);
+
+  /* Sales pipeline stages — Backoffice Sales Leads.dc.html (B9). Each
+     stage has its own hue so a card's column reads at a glance on the
+     board, in the table and on the map. */
+  --color-bo-blue: oklch(45% 0.1 250);
+  --color-bo-blue-bg: oklch(45% 0.1 250 / 0.12);
+  --color-bo-purple: oklch(45% 0.1 300);
+  --color-bo-purple-bg: oklch(45% 0.1 300 / 0.12);
+  --color-bo-teal: oklch(44% 0.08 200);
+  --color-bo-teal-bg: oklch(45% 0.08 200 / 0.13);
+  --color-bo-gold-tint: oklch(78% 0.09 85 / 0.25);
+  --color-bo-red: oklch(52% 0.16 25);
+  --color-bo-closed-bg: oklch(90% 0.01 65);
+
+  /* Quieter surfaces inside cards — a board column, a card footer, an info box */
+  --color-bo-column: oklch(95.5% 0.012 70);
+  --color-bo-footer: oklch(97% 0.01 75);
+  --color-bo-well: oklch(96.5% 0.01 75);
 }
 
 body {

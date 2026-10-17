@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { Navigate, createBrowserRouter } from "react-router";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 /**
@@ -47,6 +47,40 @@ export const router = createBrowserRouter([
           {
             path: "shops/:shopId",
             lazy: () => import("@/pages/ShopDetailPage").then((m) => ({ Component: m.default })),
+          },
+          // Sales (Backoffice Sales Leads.dc.html). "/sales" on its own is
+          // Today; AppShell's gate treats every path here as needing
+          // sales.work or sales.manage, and Reps & Territories sales.manage.
+          { path: "sales", element: <Navigate to="/sales/today" replace /> },
+          {
+            path: "sales/today",
+            lazy: () =>
+              import("@/pages/sales/SalesTodayPage").then((m) => ({ Component: m.default })),
+          },
+          {
+            path: "sales/pipeline",
+            lazy: () =>
+              import("@/pages/sales/SalesPipelinePage").then((m) => ({ Component: m.default })),
+          },
+          {
+            path: "sales/leads/:leadId",
+            lazy: () =>
+              import("@/pages/sales/SalesLeadPage").then((m) => ({ Component: m.default })),
+          },
+          {
+            path: "sales/map",
+            lazy: () =>
+              import("@/pages/sales/SalesMapPage").then((m) => ({ Component: m.default })),
+          },
+          {
+            path: "sales/reps",
+            lazy: () =>
+              import("@/pages/sales/SalesRepsPage").then((m) => ({ Component: m.default })),
+          },
+          {
+            path: "sales/stats",
+            lazy: () =>
+              import("@/pages/sales/SalesStatsPage").then((m) => ({ Component: m.default })),
           },
           {
             path: "plans",

@@ -13,6 +13,10 @@ import { z } from "zod";
 const envSchema = z.object({
   VITE_API_BASE_URL: z.string().url({ message: "VITE_API_BASE_URL must be a valid URL" }),
   VITE_GOOGLE_CLIENT_ID: z.string().min(1, "VITE_GOOGLE_CLIENT_ID is required for Google sign-in"),
+  // Optional: Mapbox tiles for the Sales City Map (the same public token
+  // the tenant app's location picker uses). Unset, the map draws
+  // OpenStreetMap's standard tiles instead.
+  VITE_MAPBOX_ACCESS_TOKEN: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(import.meta.env);

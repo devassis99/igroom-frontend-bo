@@ -5,6 +5,10 @@ interface ModalProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
+  /** Card width in px on a wide screen. Defaults to the B4b frame's 480. */
+  width?: number;
+  /** Accessible name, when the first heading inside isn't enough. */
+  label?: string;
 }
 
 /**
@@ -15,7 +19,7 @@ interface ModalProps {
  * div), not the actual browser viewport, which is what made the card
  * look shoved to one side instead of centered on the page.
  */
-export function Modal({ open, onClose, children }: ModalProps) {
+export function Modal({ open, onClose, children, width = 480, label }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     function onKeyDown(e: KeyboardEvent) {
@@ -29,7 +33,10 @@ export function Modal({ open, onClose, children }: ModalProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-bo-backdrop p-5 backdrop-blur-[6px]"
+      // On a phone the card becomes a bottom sheet (Sales mobile, B9l):
+      // full width, anchored to the bottom edge where a thumb can reach
+      // its buttons.
+      className="fixed inset-0 z-50 flex items-end justify-center bg-bo-backdrop backdrop-blur-[6px] sm:items-center sm:p-5"
       // Closes only on a click that landed on the backdrop itself. The card
       // used to stopPropagation instead, which meant the card carried a
       // click handler it never needed — and read as an interactive element
@@ -47,8 +54,9 @@ export function Modal({ open, onClose, children }: ModalProps) {
         // eslint-disable-next-line jsx-a11y/prefer-tag-over-role
         role="dialog"
         aria-modal="true"
-        className="flex max-h-full w-[480px] flex-col gap-5 overflow-y-auto rounded-2xl bg-bo-surface p-8"
-        style={{ boxShadow: "0 30px 70px -20px rgba(20,15,5,0.5)" }}
+        aria-label={label}
+        className="flex max-h-[92dvh] w-full flex-col gap-5 overflow-y-auto rounded-t-[24px] bg-bo-surface p-5 pb-8 sm:max-h-full sm:rounded-2xl sm:p-8"
+        style={{ maxWidth: width, boxShadow: "0 30px 70px -20px rgba(20,15,5,0.5)" }}
       >
         {children}
       </div>
