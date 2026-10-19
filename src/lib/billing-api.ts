@@ -61,7 +61,7 @@ export interface BillingPaymentLink {
   productId: string;
   priceId: string;
   billingInterval: BillingInterval;
-  /** A tenant-app signup link (/join/<token>) when `token` is set — what "Copy" hands out — otherwise a Stripe Payment Link (the "Create Payment Link" modal). */
+  /** A tenant-app signup link (/join/<token>) when `token` is set — every link made today, by Copy or the "Create Payment Link" modal. Otherwise a legacy Stripe Payment Link. */
   url: string;
   token: string | null;
   isDefault: boolean;
@@ -70,10 +70,12 @@ export interface BillingPaymentLink {
   trialDaysOverride: number | null;
   discountType: PaymentLinkDiscountType | null;
   discountValue: number | null;
-  /** The buyer enters this at checkout to redeem the discount — Stripe Payment Links can't apply a coupon automatically. Null unless a discount was set. */
+  /** Legacy Stripe Payment Links only. A signup link's discount is applied at checkout automatically, so this is null on every link made today. */
   promotionCode: string | null;
-  /** Record-keeping only today — nothing auto-deactivates the Stripe link once this passes. */
+  /** When the link stops working. Always set on signup links. */
   expiresAt: string | null;
+  /** When a shop signed up through it — a link works for one shop, so it's dead to anyone else after this. */
+  usedAt: string | null;
   isActive: boolean;
 }
 
@@ -85,7 +87,8 @@ export interface CreatePaymentLinkInput {
   trialDaysOverride?: number;
   discountType?: PaymentLinkDiscountType;
   discountValue?: number;
-  expiresInDays?: number | null;
+  /** 1–90. Omitted = the server's default (7 days unless SIGNUP_LINK_TTL_DAYS says otherwise). Links always expire. */
+  expiresInDays?: number;
 }
 
 /**
@@ -135,8 +138,8 @@ export const billingApi = {
       body: input,
     }),
 
-  /** The price row's "Copy" action — a tenant-app signup link (/join/<token>) for this price. Idempotent, reuses the existing one if there is one. */
-  getOrCreateDefaultPaymentLink: (priceId: string) =>
+  /** The price row's "Copy" action — a new tenant-app signup link (/join/<token>) for this price on every call: one link, one shop, and it expires. */
+  createCopyLink: (priceId: string) =>
     apiRequest<{ paymentLink: BillingPaymentLink }>(`/billing/prices/${priceId}/payment-link`, {
       method: "POST",
     }),

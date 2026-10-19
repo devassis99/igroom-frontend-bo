@@ -350,6 +350,20 @@ function InviteRow({ invite }: { invite: InviteSummary }) {
     rejected: "Declined by a manager",
     cancelled: "Cancelled",
   };
+  // Every invite link expires and works for one shop — say which, so a
+  // rep knows when to send a fresh one (Convert to shop again).
+  const linkNote =
+    invite.status === "account_created" || !invite.linkState
+      ? null
+      : invite.linkState === "live"
+        ? invite.linkExpiresAt
+          ? `Link works until ${shortDate(invite.linkExpiresAt)}`
+          : null
+        : invite.linkState === "used"
+          ? "Link used — a shop has signed up with it"
+          : invite.linkState === "expired"
+            ? `Link expired${invite.linkExpiresAt ? ` ${shortDate(invite.linkExpiresAt)}` : ""} — send a new one with Convert to shop`
+            : "Link switched off — send a new one with Convert to shop";
   const terms = [
     invite.trialDays ? `${invite.trialDays}-day trial` : null,
     invite.discountPct
@@ -376,7 +390,14 @@ function InviteRow({ invite }: { invite: InviteSummary }) {
         {invite.openedAt ? ` · opened ${shortDate(invite.openedAt)}` : ""}
         {invite.ownerEmail ? ` · ${invite.ownerEmail}` : ""}
       </span>
-      {invite.url && invite.status !== "account_created" && (
+      {linkNote && (
+        <span
+          className={`font-sans text-[11px] ${invite.linkState === "live" ? "text-bo-muted-4" : "font-semibold text-bo-red"}`}
+        >
+          {linkNote}
+        </span>
+      )}
+      {invite.url && invite.linkState === "live" && invite.status !== "account_created" && (
         <div className="flex gap-3">
           <button
             type="button"

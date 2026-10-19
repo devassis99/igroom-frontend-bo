@@ -18,9 +18,10 @@ const CYCLE_OPTIONS: { value: BillingInterval; label: string }[] = [
   { value: "half_year", label: "Bi-Annual" },
   { value: "year", label: "Annual" },
 ];
-const CYCLE_LABEL = Object.fromEntries(
-  CYCLE_OPTIONS.map((c) => [c.value, c.label]),
-) as Record<BillingInterval, string>;
+const CYCLE_LABEL = Object.fromEntries(CYCLE_OPTIONS.map((c) => [c.value, c.label])) as Record<
+  BillingInterval,
+  string
+>;
 
 const CYCLE_FILTERS = ["All Billing Cycles", ...CYCLE_OPTIONS.map((c) => c.label)];
 const STATUSES = ["All Statuses", "Active", "Archived", "No Prices Yet"];
@@ -40,6 +41,16 @@ const modalSubmitButtonClass =
  * the New Product form (matching the mockup) only asks for a name, so we
  * generate it rather than making an admin think about an internal id.
  */
+/** How long a link from the "Create Payment Link" modal works. There is no "never" — every invite link expires. */
+const EXPIRY_OPTIONS = [1, 3, 7, 14, 30] as const;
+type ExpiryDays = (typeof EXPIRY_OPTIONS)[number];
+const DEFAULT_EXPIRY_DAYS: ExpiryDays = 7;
+
+/** "Oct 25" — when a link stops working. */
+function shortExpiry(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
 function slugifyKey(name: string): string {
   return name
     .trim()
@@ -153,8 +164,8 @@ function NewProductModal({ open, onClose }: { open: boolean; onClose: () => void
           STRIPE SYNC
         </span>
         <span className="font-sans text-xs leading-relaxed text-bo-muted-4">
-          Saving creates this product in Stripe. Add one or more prices to it next — each price is
-          a billing cycle (Monthly, Quarterly, Bi-Annual, Annual) with its own seat limit and trial
+          Saving creates this product in Stripe. Add one or more prices to it next — each price is a
+          billing cycle (Monthly, Quarterly, Bi-Annual, Annual) with its own seat limit and trial
           period.
         </span>
       </div>
@@ -200,7 +211,13 @@ interface AddPriceTarget {
  * live on the product's `limits`, not per price/cadence). Left in the
  * form to match the mockup; see the hint text under the field.
  */
-function AddPriceModal({ target, onClose }: { target: AddPriceTarget | null; onClose: () => void }) {
+function AddPriceModal({
+  target,
+  onClose,
+}: {
+  target: AddPriceTarget | null;
+  onClose: () => void;
+}) {
   const queryClient = useQueryClient();
   const [cycle, setCycle] = useState<BillingInterval>("month");
   const [priceInput, setPriceInput] = useState("");
@@ -258,8 +275,7 @@ function AddPriceModal({ target, onClose }: { target: AddPriceTarget | null; onC
         </button>
       </div>
       <p className="-mt-2.5 m-0 font-sans text-xs text-bo-muted-5">
-        Adding a price to{" "}
-        <span className="font-medium text-bo-ink-soft">{target?.product}</span> (
+        Adding a price to <span className="font-medium text-bo-ink-soft">{target?.product}</span> (
         {target?.productKey})
       </p>
 
@@ -401,22 +417,21 @@ function CycleChip({
 /**
  * Matches Backoffice.dc.html's B4d frame, wired as the "Create Payment
  * Link" header action — hits POST /billing/payment-links
- * (billing.service.ts createPaymentLinks), which creates a real Stripe
- * Payment Link per selected cycle.
+ * (payment-links.service.ts createPaymentLinks), which makes one signup
+ * link (/join/<token>) per selected cycle with the terms set here. The
+ * shop signs up, then pays at a Checkout Session that applies them — the
+ * discount included, so there's no code for them to type in.
  *
- * Three deliberate departures from the static mockup, all because
- * Stripe's actual API doesn't support what it visually implies:
- *  - Stripe can't offer a buyer a choice between several prices inside
- *    one Payment Link, so checking multiple cycles here generates one
- *    link per cycle (all returned together below), not one link the
- *    shop picks a cycle within.
- *  - The link preview box in the mockup shows a URL before you've
- *    generated anything; a real Stripe URL only exists after creation,
- *    so this shows the result(s) after "Generate Link" instead of a live
- *    preview beforehand.
- *  - A discount can't be pre-applied to a Payment Link (only Checkout
- *    Sessions support that) — it's redeemed via a Promotion Code the
- *    shop enters at checkout, shown above the link(s) once generated.
+ * Every link expires (1–30 days here, a week unless changed) and works
+ * for one shop: it stops as soon as a shop has signed up through it.
+ *
+ * Departures from the static mockup:
+ *  - A link sells one price, so checking several cycles generates one
+ *    link per cycle (all returned together below), not one link the shop
+ *    picks a cycle within.
+ *  - The mockup's preview box shows a URL before anything is generated;
+ *    a link only exists once it's created, so the result(s) show after
+ *    "Generate Link" instead.
  */
 function CreatePaymentLinkModal({
   open,
@@ -433,7 +448,7 @@ function CreatePaymentLinkModal({
   const [trialDaysOverride, setTrialDaysOverride] = useState("");
   const [discountType, setDiscountType] = useState<"" | PaymentLinkDiscountType>("");
   const [discountValue, setDiscountValue] = useState("");
-  const [expiresOption, setExpiresOption] = useState<"never" | "7" | "30">("never");
+  const [expiresInDays, setExpiresInDays] = useState<ExpiryDays>(DEFAULT_EXPIRY_DAYS);
   const [results, setResults] = useState<BillingPaymentLink[] | null>(null);
 
   const eligibleProducts = useMemo(
@@ -453,7 +468,10 @@ function CreatePaymentLinkModal({
 
   const selectedProduct = eligibleProducts.find((p) => p.id === productId) ?? null;
   const availableCycles = useMemo(
-    () => new Set((selectedProduct?.prices ?? []).filter((p) => p.isActive).map((p) => p.billingInterval)),
+    () =>
+      new Set(
+        (selectedProduct?.prices ?? []).filter((p) => p.isActive).map((p) => p.billingInterval),
+      ),
     [selectedProduct],
   );
 
@@ -500,7 +518,7 @@ function CreatePaymentLinkModal({
         trialDaysOverride: trial,
         discountType: discountType || undefined,
         discountValue: discountValueOut,
-        expiresInDays: expiresOption === "never" ? null : Number.parseInt(expiresOption, 10),
+        expiresInDays,
       });
     },
     onSuccess: ({ paymentLinks }) => setResults(paymentLinks),
@@ -513,7 +531,7 @@ function CreatePaymentLinkModal({
     setTrialDaysOverride("");
     setDiscountType("");
     setDiscountValue("");
-    setExpiresOption("never");
+    setExpiresInDays(DEFAULT_EXPIRY_DAYS);
     setResults(null);
     createLinks.reset();
   }
@@ -529,9 +547,11 @@ function CreatePaymentLinkModal({
     <Modal open={open} onClose={handleClose}>
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="m-0 mb-1 font-sans text-xl font-semibold text-bo-ink">Create Payment Link</h1>
+          <h1 className="m-0 mb-1 font-sans text-xl font-semibold text-bo-ink">
+            Create Payment Link
+          </h1>
           <p className="m-0 font-sans text-xs text-bo-muted-5">
-            Send a shop owner a checkout link with the exact terms you set
+            Send a shop owner a signup link with the exact terms you set
           </p>
         </div>
         <button
@@ -547,17 +567,6 @@ function CreatePaymentLinkModal({
       {results ? (
         <>
           <div className="flex flex-col gap-3">
-            {results[0]?.promotionCode && (
-              <div className="flex items-center justify-between rounded-[10px] border border-bo-stripe/30 bg-bo-stripe-bg px-3.5 py-2.5">
-                <span className="font-sans text-xs text-bo-stripe">
-                  Discount code — share this alongside the link(s) below, the shop enters it at
-                  checkout:
-                </span>
-                <span className="font-mono text-xs font-semibold text-bo-stripe">
-                  {results[0].promotionCode}
-                </span>
-              </div>
-            )}
             {results.map((link) => (
               <div key={link.id} className="flex flex-col gap-1.5">
                 <span className="font-sans text-xs font-medium text-bo-muted-1">
@@ -571,6 +580,14 @@ function CreatePaymentLinkModal({
                 </div>
               </div>
             ))}
+            <p className="m-0 font-sans text-[11px] text-bo-muted-5">
+              {results.length === 1 ? "This link works" : "Each link works"} for one shop
+              {results[0]?.expiresAt ? `, until ${shortExpiry(results[0].expiresAt)}` : ""} — it
+              stops as soon as a shop signs up with it.
+              {results[0]?.discountType
+                ? " The discount is applied at checkout automatically."
+                : ""}
+            </p>
           </div>
           <div className="flex justify-end gap-2.5 pt-1.5">
             <button type="button" onClick={resetForm} className={modalCancelButtonClass}>
@@ -592,7 +609,9 @@ function CreatePaymentLinkModal({
               }}
               className={formInputClass}
             >
-              {eligibleProducts.length === 0 && <option value="">No products with active prices</option>}
+              {eligibleProducts.length === 0 && (
+                <option value="">No products with active prices</option>
+              )}
               {eligibleProducts.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -617,19 +636,19 @@ function CreatePaymentLinkModal({
               ))}
             </div>
             <p className="m-0 font-sans text-[11px] text-bo-muted-5">
-              Pick one for a single-offer link, or several to generate one link per cycle — Stripe
-              can't offer a buyer a choice of prices within a single link.
+              Pick one for a single-offer link, or several to generate one link per cycle — a link
+              sells one price.
             </p>
           </div>
 
-          <div className="flex gap-4">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4">
             <Field label="SEAT OVERRIDE">
               <input
                 type="text"
                 placeholder="Default"
                 value={seatOverride}
                 onChange={(e) => setSeatOverride(e.target.value)}
-                className={formInputClass}
+                className={`${formInputClass} w-full`}
               />
             </Field>
             <Field label="TRIAL OVERRIDE (DAYS)">
@@ -638,7 +657,7 @@ function CreatePaymentLinkModal({
                 placeholder="Default"
                 value={trialDaysOverride}
                 onChange={(e) => setTrialDaysOverride(e.target.value)}
-                className={formInputClass}
+                className={`${formInputClass} w-full`}
               />
             </Field>
           </div>
@@ -674,18 +693,20 @@ function CreatePaymentLinkModal({
 
           <Field label="LINK EXPIRES">
             <select
-              value={expiresOption}
-              onChange={(e) => setExpiresOption(e.target.value as "never" | "7" | "30")}
+              value={expiresInDays}
+              onChange={(e) => setExpiresInDays(Number(e.target.value) as ExpiryDays)}
               className={formInputClass}
             >
-              <option value="never">Never</option>
-              <option value="7">7 days</option>
-              <option value="30">30 days</option>
+              {EXPIRY_OPTIONS.map((days) => (
+                <option key={days} value={days}>
+                  {days === 1 ? "In 1 day" : `In ${days} days`}
+                </option>
+              ))}
             </select>
           </Field>
           <p className="-mt-3 m-0 font-sans text-[11px] text-bo-muted-5">
-            Recorded for reference — Stripe's Payment Links don't support automatic expiry, so this
-            isn't enforced yet. Deactivate the link in the Stripe Dashboard once it's past use.
+            The link stops working then — or as soon as a shop signs up with it, whichever comes
+            first. Each link is for one shop.
           </p>
 
           {createLinks.isError && (
@@ -715,10 +736,10 @@ function CreatePaymentLinkModal({
 
 /**
  * The price row's "Copy" action (Backoffice.dc.html's LINK column) —
- * lazily gets-or-creates this price's signup link (payment-links.service
- * .ts getOrCreateDefaultPaymentLink — idempotent, so a second click by
- * anyone reuses the same link) and copies the URL straight to the
- * clipboard.
+ * makes a new signup link for this price (payment-links.service.ts
+ * createCopyLink) and copies the URL straight to the clipboard. A new
+ * one on every click: a link works for one shop and expires after a
+ * week, so there's no shared link per price to hand out twice.
  *
  * The URL is the tenant app's `/join/<token>`, not a Stripe Payment
  * Link: the shop that opens it goes through the normal self-signup
@@ -726,15 +747,18 @@ function CreatePaymentLinkModal({
  * chosen, pays at Stripe Checkout, and ends up with a real account.
  */
 function CopyLinkButton({ priceDbId }: { priceDbId: string }) {
-  const [copied, setCopied] = useState(false);
+  // The copied link's expiry, in the tooltip for a few seconds after the
+  // copy, so whoever sends it can tell the shop how long they have. (Not
+  // in the label: the actions column has room for "Copied!" and no more.)
+  const [copiedUntil, setCopiedUntil] = useState<string | null>(null);
 
   const copyLink = useMutation({
-    mutationFn: () => billingApi.getOrCreateDefaultPaymentLink(priceDbId),
+    mutationFn: () => billingApi.createCopyLink(priceDbId),
     onSuccess: async ({ paymentLink }) => {
       try {
         await navigator.clipboard.writeText(paymentLink.url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+        setCopiedUntil(paymentLink.expiresAt ? shortExpiry(paymentLink.expiresAt) : "");
+        setTimeout(() => setCopiedUntil(null), 4000);
       } catch {
         // No clipboard permission/API — the link itself was still created successfully.
       }
@@ -749,11 +773,19 @@ function CopyLinkButton({ priceDbId }: { priceDbId: string }) {
       title={
         copyLink.isError
           ? errorMessage(copyLink.error, "Failed to generate link.")
-          : "Copy a signup link for this plan — the shop signs up with this price already chosen"
+          : copiedUntil
+            ? `Copied — this link works for one shop until ${copiedUntil}`
+            : "Copy a new signup link for this plan — for one shop, with this price already chosen. It expires, and stops working once that shop has signed up."
       }
-      className={`font-sans text-xs font-semibold ${copyLink.isError ? "text-bo-danger" : "text-bo-stripe"}`}
+      className={`whitespace-nowrap font-sans text-xs font-semibold ${copyLink.isError ? "text-bo-danger" : "text-bo-stripe"}`}
     >
-      {copyLink.isPending ? "…" : copyLink.isError ? "Retry" : copied ? "Copied!" : "🔗 Copy"}
+      {copyLink.isPending
+        ? "…"
+        : copyLink.isError
+          ? "Retry"
+          : copiedUntil !== null
+            ? "Copied!"
+            : "🔗 Copy"}
     </button>
   );
 }
@@ -786,7 +818,8 @@ function DeleteConfirmModal({
   onConfirm: () => void;
   onClose: () => void;
 }) {
-  const title = target?.kind === "price" ? `Delete the ${target.cycle} price?` : `Delete ${target?.product}?`;
+  const title =
+    target?.kind === "price" ? `Delete the ${target.cycle} price?` : `Delete ${target?.product}?`;
   const body =
     target?.kind === "price"
       ? `This archives it in Stripe — existing subscribers of ${target.product} keep it, but it can no longer be offered to new signups. This can't be undone; Stripe prices can't be reactivated.`
@@ -808,7 +841,9 @@ function DeleteConfirmModal({
       <p className="-mt-2.5 m-0 font-sans text-xs leading-relaxed text-bo-muted-5">{body}</p>
 
       {error !== undefined && error !== null && (
-        <p className="m-0 font-sans text-xs text-bo-danger">{errorMessage(error, "Failed to delete.")}</p>
+        <p className="m-0 font-sans text-xs text-bo-danger">
+          {errorMessage(error, "Failed to delete.")}
+        </p>
       )}
 
       <div className="flex justify-end gap-2.5 pt-1.5">
@@ -1064,7 +1099,6 @@ export function PlansPage() {
     [rows, productFilter, cycleFilter, statusFilter],
   );
 
-
   return (
     <div>
       <h1 className="m-0 mb-5 font-sans text-2xl font-semibold text-bo-ink">Plans</h1>
@@ -1150,7 +1184,9 @@ export function PlansPage() {
             Couldn't load plans: {errorMessage(catalogQuery.error, "unknown error")}
           </p>
         ) : filteredRows.length === 0 ? (
-          <p className="px-5 py-6 font-sans text-sm text-bo-muted-3">No prices match these filters.</p>
+          <p className="px-5 py-6 font-sans text-sm text-bo-muted-3">
+            No prices match these filters.
+          </p>
         ) : (
           filteredRows.map((row, i) => {
             return (
@@ -1160,7 +1196,9 @@ export function PlansPage() {
                   i > 0 ? "border-t border-bo-border-soft" : ""
                 }`}
               >
-                <span className="font-sans text-[13px] font-semibold text-bo-ink">{row.product}</span>
+                <span className="font-sans text-[13px] font-semibold text-bo-ink">
+                  {row.product}
+                </span>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.cycle}</span>
                 <button
                   type="button"
@@ -1176,10 +1214,16 @@ export function PlansPage() {
                 </button>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.price}</span>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.seats}</span>
-                <span className="font-sans text-xs font-medium text-bo-muted-2">{row.trialDays}</span>
+                <span className="font-sans text-xs font-medium text-bo-muted-2">
+                  {row.trialDays}
+                </span>
                 <StatusPill
                   tone={
-                    row.status === "Active" ? "success" : row.status === "No Prices Yet" ? "gold" : "neutral"
+                    row.status === "Active"
+                      ? "success"
+                      : row.status === "No Prices Yet"
+                        ? "gold"
+                        : "neutral"
                   }
                 >
                   {row.status}
@@ -1239,7 +1283,11 @@ export function PlansPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setDeleteTarget({ kind: "product", productId: row.productId, product: row.product })
+                        setDeleteTarget({
+                          kind: "product",
+                          productId: row.productId,
+                          product: row.product,
+                        })
                       }
                       className="font-sans text-xs font-semibold text-bo-danger"
                     >
@@ -1262,8 +1310,14 @@ export function PlansPage() {
       <AddPriceModal target={addPriceTarget} onClose={() => setAddPriceTarget(null)} />
       <DeleteConfirmModal
         target={deleteTarget}
-        isPending={deleteTarget?.kind === "price" ? archivePriceMutation.isPending : archiveProductMutation.isPending}
-        error={deleteTarget?.kind === "price" ? archivePriceMutation.error : archiveProductMutation.error}
+        isPending={
+          deleteTarget?.kind === "price"
+            ? archivePriceMutation.isPending
+            : archiveProductMutation.isPending
+        }
+        error={
+          deleteTarget?.kind === "price" ? archivePriceMutation.error : archiveProductMutation.error
+        }
         onConfirm={confirmDelete}
         onClose={closeDeleteModal}
       />

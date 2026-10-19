@@ -139,6 +139,10 @@ export interface InviteSummary {
   discountPct: number | null;
   discountMonths: number | null;
   url: string | null;
+  /** When the invite's link stops working. */
+  linkExpiresAt: string | null;
+  /** Whether the link still works: "used" once the shop has signed up through it. Null before there's a link (waiting on approval). */
+  linkState: "live" | "used" | "expired" | "off" | null;
   sentAt: string | null;
   openedAt: string | null;
   createdAt: string;

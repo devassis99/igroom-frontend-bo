@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/components/ui/Modal";
 import { BILLING_INTERVAL_LABEL } from "@/lib/shops-api";
-import { formatMoney, salesApi, type InviteResult, type Lead } from "@/lib/sales-api";
+import { formatMoney, salesApi, shortDate, type InviteResult, type Lead } from "@/lib/sales-api";
 import {
   ErrorNote,
   inputClass,
@@ -444,6 +444,12 @@ export function ConvertModal({ lead, onClose }: { lead: Lead | null; onClose: ()
                     {copied ? "Copied" : "Copy"}
                   </button>
                 </div>
+              )}
+              {result.url && result.invite.linkExpiresAt && (
+                <p className="-mt-1 m-0 font-sans text-xs text-bo-muted-4">
+                  Works for this shop until {shortDate(result.invite.linkExpiresAt)}, and stops once
+                  they've signed up.
+                </p>
               )}
               {(showQr ||
                 !result.invite.delivery ||
