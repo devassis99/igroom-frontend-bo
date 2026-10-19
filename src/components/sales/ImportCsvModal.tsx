@@ -220,7 +220,7 @@ export function ImportCsvModal({ open, onClose }: { open: boolean; onClose: () =
         <>
           {step === 2 && (
             <div className="overflow-hidden rounded-xl border border-bo-border">
-              <div className="grid grid-cols-[1fr_1.3fr_24px_1fr] gap-3 bg-bo-table-head px-4 py-2 font-sans text-[11px] font-semibold text-bo-muted-4">
+              <div className="grid grid-cols-[1fr_1.3fr_24px_1fr] gap-3 bg-bo-table-head px-4 py-2 font-sans text-[12px] font-semibold text-bo-muted-4">
                 <span>Your column</span>
                 <span>First row</span>
                 <span />
@@ -312,7 +312,7 @@ export function ImportCsvModal({ open, onClose }: { open: boolean; onClose: () =
               ).map(([value, label]) => (
                 <label
                   key={value}
-                  className="flex items-center gap-2 font-sans text-[13px] font-medium text-bo-ink-soft"
+                  className="flex items-center gap-2 font-sans text-[14px] font-medium text-bo-ink-soft"
                 >
                   <input
                     type="radio"
@@ -349,7 +349,7 @@ export function ImportCsvModal({ open, onClose }: { open: boolean; onClose: () =
           </div>
 
           {step === 3 && summary && (
-            <p className="m-0 rounded-[10px] bg-bo-well px-3 py-2.5 font-sans text-[13px] text-bo-ink-soft">
+            <p className="m-0 rounded-[10px] bg-bo-well px-3 py-2.5 font-sans text-[14px] text-bo-ink-soft">
               Ready to import <b>{summary.toImport}</b> lead{summary.toImport === 1 ? "" : "s"} into{" "}
               {cities.find((c) => c.id === city)?.name ?? "the pipeline"}.
             </p>
@@ -395,7 +395,7 @@ export function ImportCsvModal({ open, onClose }: { open: boolean; onClose: () =
             <p className="m-0 mb-1 font-semibold">
               Imported {commit.data.imported} lead{commit.data.imported === 1 ? "" : "s"}.
             </p>
-            <p className="m-0 text-[13px] text-bo-muted-2">
+            <p className="m-0 text-[14px] text-bo-muted-2">
               {[
                 commit.data.byRep.map((r) => `${r.count} to ${r.name}`).join(", "),
                 commit.data.toPool ? `${commit.data.toPool} to the pool` : null,

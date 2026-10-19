@@ -256,7 +256,7 @@ export function TileMap({
               style={{ background: p.color }}
             />
             {((p.labelled && view.zoom >= LABEL_ZOOM) || p.id === selectedId) && (
-              <span className="rounded-md bg-bo-surface/90 px-1.5 py-0.5 font-sans text-[11px] font-semibold whitespace-nowrap text-bo-ink-soft">
+              <span className="rounded-md bg-bo-surface/90 px-1.5 py-0.5 font-sans text-[12px] font-semibold whitespace-nowrap text-bo-ink-soft">
                 {p.name}
               </span>
             )}
@@ -300,7 +300,7 @@ export function TileMap({
       </div>
       <span
         data-map-control
-        className="absolute right-1 bottom-1 rounded bg-bo-surface/85 px-1.5 py-0.5 font-sans text-[10px] text-bo-muted-4"
+        className="absolute right-1 bottom-1 rounded bg-bo-surface/85 px-1.5 py-0.5 font-sans text-[11px] text-bo-muted-4"
       >
         {env.VITE_MAPBOX_ACCESS_TOKEN ? "© Mapbox © OpenStreetMap" : "© OpenStreetMap contributors"}
       </span>

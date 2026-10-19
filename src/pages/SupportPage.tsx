@@ -31,7 +31,7 @@ export function SupportPage() {
       <h1 className="m-0 mb-5 font-sans text-2xl font-semibold text-bo-ink">Support Tickets</h1>
 
       <div className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface">
-        <div className="grid grid-cols-[1.8fr_1fr_1fr_0.9fr] bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4">
+        <div className="grid grid-cols-[1.8fr_1fr_1fr_0.9fr] bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4">
           <span>Shop</span>
           <span>Issue</span>
           <span>Opened</span>
@@ -44,7 +44,7 @@ export function SupportPage() {
               i < ROWS.length - 1 ? "border-b border-bo-border-soft" : ""
             }`}
           >
-            <span className="font-sans text-[13px] font-semibold text-bo-ink">{row.shop}</span>
+            <span className="font-sans text-[14px] font-semibold text-bo-ink">{row.shop}</span>
             <span className="font-sans text-xs font-medium text-bo-muted-2">{row.issue}</span>
             <span className="font-sans text-xs font-medium text-bo-muted-2">{row.opened}</span>
             <StatusPill tone={row.tone}>{row.status}</StatusPill>

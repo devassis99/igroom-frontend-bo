@@ -181,7 +181,7 @@ export function AddressField({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => pick(s)}
-                className="block w-full px-3 py-2 text-left font-sans text-[13px] text-bo-ink-soft hover:bg-bo-well"
+                className="block w-full px-3 py-2 text-left font-sans text-[14px] text-bo-ink-soft hover:bg-bo-well"
               >
                 {s.displayName}
               </button>
@@ -189,7 +189,7 @@ export function AddressField({
           ))}
         </ul>
       )}
-      {note && <span className="font-sans text-[11px] text-bo-muted-4">{note}</span>}
+      {note && <span className="font-sans text-[12px] text-bo-muted-4">{note}</span>}
     </div>
   );
 }

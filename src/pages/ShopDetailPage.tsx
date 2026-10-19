@@ -59,7 +59,7 @@ function Card({ title, children }: { title?: string; children: React.ReactNode }
   return (
     <div className="rounded-[14px] border border-bo-border bg-bo-surface p-5">
       {title && (
-        <p className="m-0 mb-3.5 font-sans text-[11px] font-semibold tracking-[0.04em] text-bo-muted-4">
+        <p className="m-0 mb-3.5 font-sans text-[12px] font-semibold tracking-[0.04em] text-bo-muted-4">
           {title}
         </p>
       )}
@@ -71,10 +71,10 @@ function Card({ title, children }: { title?: string; children: React.ReactNode }
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="font-sans text-[10px] font-semibold tracking-[0.04em] text-bo-muted-5">
+      <span className="font-sans text-[11px] font-semibold tracking-[0.04em] text-bo-muted-5">
         {label}
       </span>
-      <span className="font-sans text-[13px] font-medium break-words text-bo-ink-soft">
+      <span className="font-sans text-[14px] font-medium break-words text-bo-ink-soft">
         {value}
       </span>
     </div>
@@ -85,7 +85,7 @@ function StatTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[14px] border border-bo-border bg-bo-surface p-[18px]">
       <span className="font-sans text-xs text-bo-muted-4">{label}</span>
-      <p className="m-0 mt-2 font-sans text-[26px] font-bold text-bo-ink">{value}</p>
+      <p className="m-0 mt-2 font-sans text-[24px] font-bold text-bo-ink">{value}</p>
     </div>
   );
 }
@@ -143,7 +143,7 @@ function OverviewTab({ shop }: { shop: ShopDetail }) {
           />
         </div>
         {shop.description && (
-          <p className="m-0 mt-4 font-sans text-[13px] leading-relaxed text-bo-muted-2">
+          <p className="m-0 mt-4 font-sans text-[14px] leading-relaxed text-bo-muted-2">
             {shop.description}
           </p>
         )}
@@ -165,7 +165,7 @@ function LocationsTab({ shop }: { shop: ShopDetail }) {
 
   return (
     <div className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface">
-      <div className="grid grid-cols-[1.2fr_2fr_1fr_0.8fr_0.7fr] bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4">
+      <div className="grid grid-cols-[1.2fr_2fr_1fr_0.8fr_0.7fr] bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4">
         <span>NAME</span>
         <span>ADDRESS</span>
         <span>PHONE</span>
@@ -179,10 +179,10 @@ function LocationsTab({ shop }: { shop: ShopDetail }) {
             i < shop.locations.length - 1 ? "border-b border-bo-border-soft" : ""
           }`}
         >
-          <span className="font-sans text-[13px] font-semibold text-bo-ink">
+          <span className="font-sans text-[14px] font-semibold text-bo-ink">
             {location.name}
             {location.isPrimary && (
-              <span className="ml-1.5 font-sans text-[10px] font-medium text-bo-muted-5">
+              <span className="ml-1.5 font-sans text-[11px] font-medium text-bo-muted-5">
                 (primary)
               </span>
             )}
@@ -210,7 +210,7 @@ function StaffTab({ shop }: { shop: ShopDetail }) {
 
   return (
     <div className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface">
-      <div className="grid grid-cols-[1.2fr_1.5fr_1fr_1fr_0.8fr_1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4">
+      <div className="grid grid-cols-[1.2fr_1.5fr_1fr_1fr_0.8fr_1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4">
         <span>NAME</span>
         <span>EMAIL</span>
         <span>ROLE</span>
@@ -225,7 +225,7 @@ function StaffTab({ shop }: { shop: ShopDetail }) {
             i < shop.staff.length - 1 ? "border-b border-bo-border-soft" : ""
           }`}
         >
-          <span className="font-sans text-[13px] font-semibold text-bo-ink">{member.name}</span>
+          <span className="font-sans text-[14px] font-semibold text-bo-ink">{member.name}</span>
           <span className="truncate font-sans text-xs text-bo-muted-2">{member.email}</span>
           <span className="font-sans text-xs text-bo-muted-2">{member.roleName ?? "—"}</span>
           <span className="font-sans text-xs text-bo-muted-2">{member.locationName ?? "—"}</span>
@@ -301,7 +301,7 @@ function PlanTab({
           />
         </div>
 
-        <p className="m-0 mt-4 font-sans text-[11px] leading-relaxed text-bo-muted-5">
+        <p className="m-0 mt-4 font-sans text-[12px] leading-relaxed text-bo-muted-5">
           MRR is the monthly equivalent — an annual plan is divided by twelve — so shops on
           different cadences can be compared and summed. It reflects the plan's value regardless of
           whether the shop is currently paying.
@@ -430,7 +430,7 @@ export function ShopDetailPage() {
             <StatusPill tone={SHOP_STATUS_TONE[shop.status]}>
               {SHOP_STATUS_LABEL[shop.status]}
             </StatusPill>
-            <span className="font-sans text-[13px] text-bo-muted-4">
+            <span className="font-sans text-[14px] text-bo-muted-4">
               {shop.planName} · {BILLING_INTERVAL_LABEL[shop.billingInterval]} ·{" "}
               {formatCents(shop.mrrCents, shop.currency)}/mo · {shop.seats} seats
             </span>
@@ -467,7 +467,7 @@ export function ShopDetailPage() {
               type="button"
               onClick={() => setTab(entry.key)}
               aria-current={active ? "page" : undefined}
-              className={`-mb-px border-b-2 px-3.5 py-2.5 font-sans text-[13px] font-semibold ${
+              className={`-mb-px border-b-2 px-3.5 py-2.5 font-sans text-[14px] font-semibold ${
                 active
                   ? "border-bo-dark text-bo-ink"
                   : "border-transparent text-bo-muted-5 hover:text-bo-ink-soft"
@@ -475,7 +475,7 @@ export function ShopDetailPage() {
             >
               {entry.label}
               {count !== undefined && (
-                <span className="ml-1.5 font-sans text-[11px] font-medium opacity-60">{count}</span>
+                <span className="ml-1.5 font-sans text-[12px] font-medium opacity-60">{count}</span>
               )}
             </button>
           );

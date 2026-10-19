@@ -74,7 +74,7 @@ function Radio({
         aria-hidden
       />
       <span>
-        <span className="mb-0.5 block font-sans text-[13px] font-semibold text-bo-ink">
+        <span className="mb-0.5 block font-sans text-[14px] font-semibold text-bo-ink">
           {title}
         </span>
         <span className="block font-sans text-xs text-bo-muted-2">{body}</span>
@@ -93,7 +93,7 @@ function Check({
   children: React.ReactNode;
 }) {
   return (
-    <label className="flex items-center gap-1.5 font-sans text-[13px] font-medium text-bo-ink-soft">
+    <label className="flex items-center gap-1.5 font-sans text-[14px] font-medium text-bo-ink-soft">
       <input
         type="checkbox"
         checked={checked}
@@ -331,7 +331,7 @@ export function ConvertModal({ lead, onClose }: { lead: Lead | null; onClose: ()
             </div>
           )}
           <p
-            className={`-mt-2 m-0 font-sans text-[11px] ${needsApproval ? "font-semibold text-bo-gold" : "text-bo-muted-4"}`}
+            className={`-mt-2 m-0 font-sans text-[12px] ${needsApproval ? "font-semibold text-bo-gold" : "text-bo-muted-4"}`}
           >
             {needsApproval
               ? `This offer is above ${threshold}% off — it waits for a manager's approval before the invite sends.`
@@ -366,7 +366,7 @@ export function ConvertModal({ lead, onClose }: { lead: Lead | null; onClose: ()
                 <div key={s.t} className="flex flex-col gap-1.5">
                   <span className="h-1 rounded-sm bg-bo-input-border" />
                   <span className="font-sans text-xs font-semibold text-bo-ink-soft">{s.t}</span>
-                  <span className="font-sans text-[11px] text-bo-muted-3">{s.d}</span>
+                  <span className="font-sans text-[12px] text-bo-muted-3">{s.d}</span>
                 </div>
               ))}
             </div>

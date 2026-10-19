@@ -22,7 +22,7 @@ export function BookingsPage() {
       </div>
 
       <div className="rounded-[14px] border border-bo-border bg-bo-surface p-5">
-        <p className="m-0 mb-1 font-sans text-[15px] font-semibold text-bo-ink">
+        <p className="m-0 mb-1 font-sans text-[16px] font-semibold text-bo-ink">
           Bookings by hour, today
         </p>
         <MiniLineChart

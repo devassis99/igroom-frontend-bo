@@ -65,16 +65,16 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
   return (
     <Card className="p-4.5">
       <span className="font-sans text-xs text-bo-muted-4">{kpi.label}</span>
-      <p className="my-2 font-sans text-[26px] font-bold text-bo-ink">{value}</p>
+      <p className="my-2 font-sans text-[24px] font-bold text-bo-ink">{value}</p>
       {delta ? (
         <span
-          className={`rounded-full px-[9px] py-[3px] font-sans text-[11px] font-semibold ${kpi.good ? "bg-bo-success-bg text-bo-success" : "bg-bo-danger-bg text-bo-danger"}`}
+          className={`rounded-full px-[9px] py-[3px] font-sans text-[12px] font-semibold ${kpi.good ? "bg-bo-success-bg text-bo-success" : "bg-bo-danger-bg text-bo-danger"}`}
           title={`Previous period: ${kpi.previous ?? "—"}`}
         >
           {delta}
         </span>
       ) : (
-        <span className="rounded-full bg-bo-neutral-bg px-[9px] py-[3px] font-sans text-[11px] font-semibold text-bo-muted-4">
+        <span className="rounded-full bg-bo-neutral-bg px-[9px] py-[3px] font-sans text-[12px] font-semibold text-bo-muted-4">
           {kpi.previous === null ? "No earlier data" : "Same as before"}
         </span>
       )}
@@ -246,14 +246,14 @@ export function SalesStatsPage() {
               <KpiTile key={k.label} kpi={k} />
             ))}
           </div>
-          <p className="-mt-1 m-0 font-sans text-[11px] text-bo-muted-5">
+          <p className="-mt-1 m-0 font-sans text-[12px] text-bo-muted-5">
             {rangeLabel}, compared with {shortDate(data.previousPeriod.from)} →{" "}
             {shortDate(addDays(new Date(data.previousPeriod.to), -1))}.
           </p>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card className="px-5 py-4.5">
-              <p className="m-0 mb-3.5 font-sans text-[15px] font-semibold text-bo-ink">Funnel</p>
+              <p className="m-0 mb-3.5 font-sans text-[16px] font-semibold text-bo-ink">Funnel</p>
               <div className="flex flex-col gap-2">
                 {data.funnel.map((f) => (
                   <Bar
@@ -265,12 +265,12 @@ export function SalesStatsPage() {
                   />
                 ))}
               </div>
-              <p className="m-0 mt-3 font-sans text-[11px] text-bo-muted-5">
+              <p className="m-0 mt-3 font-sans text-[12px] text-bo-muted-5">
                 Leads added in the period, by the furthest stage each has reached.
               </p>
             </Card>
             <Card className="px-5 py-4.5">
-              <p className="m-0 mb-3.5 font-sans text-[15px] font-semibold text-bo-ink">
+              <p className="m-0 mb-3.5 font-sans text-[16px] font-semibold text-bo-ink">
                 Why leads are lost
               </p>
               {data.lostReasons.length === 0 ? (
@@ -297,7 +297,7 @@ export function SalesStatsPage() {
           </div>
 
           <Card className="overflow-hidden">
-            <div className="hidden grid-cols-[1.4fr_1fr_0.7fr_0.6fr_0.5fr_0.7fr_0.8fr_1.3fr] gap-2.5 bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4 md:grid">
+            <div className="hidden grid-cols-[1.4fr_1fr_0.7fr_0.6fr_0.5fr_0.7fr_0.8fr_1.3fr] gap-2.5 bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4 md:grid">
               <span>Rep</span>
               <span>Type</span>
               <span>Leads added</span>
@@ -312,33 +312,33 @@ export function SalesStatsPage() {
                 key={r.repId}
                 className="grid grid-cols-2 items-center gap-2.5 border-b border-bo-border-soft px-5 py-3 md:grid-cols-[1.4fr_1fr_0.7fr_0.6fr_0.5fr_0.7fr_0.8fr_1.3fr]"
               >
-                <span className="font-sans text-[13px] font-semibold text-bo-ink">
+                <span className="font-sans text-[14px] font-semibold text-bo-ink">
                   {r.name}
                   {!r.isActive ? (
                     <span className="font-normal text-bo-muted-5"> · deactivated</span>
                   ) : null}
                 </span>
                 <span
-                  className={`w-fit rounded-full px-[9px] py-[3px] font-sans text-[11px] font-semibold whitespace-nowrap ${TYPE_PILL[r.type]}`}
+                  className={`w-fit rounded-full px-[9px] py-[3px] font-sans text-[12px] font-semibold whitespace-nowrap ${TYPE_PILL[r.type]}`}
                 >
                   {r.type === "agent" ? "Commission agent" : "Employee"}
                 </span>
-                <span className="font-sans text-[13px] font-medium text-bo-muted-1">
+                <span className="font-sans text-[14px] font-medium text-bo-muted-1">
                   <span className="md:hidden">Added </span>
                   {r.leadsAdded}
                 </span>
-                <span className="font-sans text-[13px] font-medium text-bo-muted-1">
+                <span className="font-sans text-[14px] font-medium text-bo-muted-1">
                   <span className="md:hidden">Demos </span>
                   {r.demos}
                 </span>
-                <span className="font-sans text-[13px] font-semibold text-bo-ink">
+                <span className="font-sans text-[14px] font-semibold text-bo-ink">
                   <span className="font-normal md:hidden">Live </span>
                   {r.live}
                 </span>
-                <span className="font-sans text-[13px] font-medium text-bo-muted-1">
+                <span className="font-sans text-[14px] font-medium text-bo-muted-1">
                   {r.conversionPct === null ? "—" : `${r.conversionPct}%`}
                 </span>
-                <span className="font-sans text-[13px] font-semibold text-bo-ink">
+                <span className="font-sans text-[14px] font-semibold text-bo-ink">
                   {formatMoney(r.commissionCents, r.currency)}
                 </span>
                 <PayoutCell row={r} canManage={canManage} />

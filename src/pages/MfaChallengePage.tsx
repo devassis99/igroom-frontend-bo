@@ -50,10 +50,10 @@ export function MfaChallengePage() {
     <main className="flex min-h-screen items-center justify-center bg-bo-page px-4">
       <div className="flex w-[380px] flex-col gap-6">
         <div className="flex flex-col items-center gap-1.5 text-center">
-          <p className="m-0 font-serif text-2xl font-semibold text-bo-ink">
+          <p className="m-0 font-sans text-2xl font-semibold text-bo-ink">
             Enter verification code
           </p>
-          <p className="m-0 font-sans text-[13px] text-bo-muted-3">
+          <p className="m-0 font-sans text-[14px] text-bo-muted-3">
             Open your authenticator app and enter the current code.
           </p>
         </div>
@@ -64,7 +64,7 @@ export function MfaChallengePage() {
             type="button"
             onClick={() => submit(code)}
             disabled={pending || code.length !== 6}
-            className="rounded-xl bg-bo-dark py-[15px] font-sans text-[15px] font-semibold text-bo-on-dark disabled:opacity-50"
+            className="rounded-xl bg-bo-dark py-[15px] font-sans text-[16px] font-semibold text-bo-on-dark disabled:opacity-50"
           >
             {pending ? "Verifying…" : "Verify & sign in"}
           </button>

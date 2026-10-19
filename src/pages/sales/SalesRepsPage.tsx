@@ -106,7 +106,7 @@ function PlanFields({
           className={inputClass}
         />
       </label>
-      <p className="col-span-3 m-0 font-sans text-[11px] text-bo-muted-4">
+      <p className="col-span-3 m-0 font-sans text-[12px] text-bo-muted-4">
         {type === "employee" ? "On top of salary. " : "Paid only on results. "}
         Earned when a shop takes its first online booking; payouts on the last day of each month.
       </p>
@@ -173,7 +173,7 @@ function InviteRepModal({
           { value: "agent", label: "Commission agent" },
         ]}
       />
-      <p className="-mt-2 m-0 font-sans text-[11px] text-bo-muted-4">
+      <p className="-mt-2 m-0 font-sans text-[12px] text-bo-muted-4">
         {type === "agent"
           ? "Agents see only their own leads and the unassigned pool."
           : "Employees can read the whole pipeline."}
@@ -253,7 +253,7 @@ function EditRepModal({ rep, onClose }: { rep: RepRow | null; onClose: () => voi
         ]}
       />
       <PlanFields type={type} plan={plan} onChange={setPlan} />
-      <p className="m-0 font-sans text-[11px] text-bo-muted-4">
+      <p className="m-0 font-sans text-[12px] text-bo-muted-4">
         A new plan applies to shops that go live from now on — commission already earned stays as it
         was.
       </p>
@@ -612,10 +612,10 @@ function AssignPoolModal({
                 className="h-4 w-4 accent-[oklch(30%_0.02_50)]"
               />
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-sans text-[13px] font-semibold text-bo-ink">
+                <span className="block truncate font-sans text-[14px] font-semibold text-bo-ink">
                   {l.shopName}
                 </span>
-                <span className="block truncate font-sans text-[11px] text-bo-muted-4">
+                <span className="block truncate font-sans text-[12px] text-bo-muted-4">
                   {[l.area, l.cityName, l.sourceLabel, l.isAuto ? "auto" : null]
                     .filter(Boolean)
                     .join(" · ")}
@@ -640,7 +640,7 @@ function AssignPoolModal({
           <select
             value={repId}
             onChange={(e) => setRepId(e.target.value)}
-            className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3 py-2 font-sans text-[13px]"
+            className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3 py-2 font-sans text-[14px]"
             aria-label="Give to"
           >
             <option value="">Give to…</option>
@@ -835,7 +835,7 @@ export function SalesRepsPage() {
       <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="flex flex-col gap-4">
           <Card className="overflow-hidden">
-            <div className="hidden grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,0.5fr)_minmax(0,0.6fr)_minmax(0,1.5fr)] gap-3 bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4 md:grid">
+            <div className="hidden grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,0.5fr)_minmax(0,0.6fr)_minmax(0,1.5fr)] gap-3 bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4 md:grid">
               <span>Rep</span>
               <span>Type</span>
               <span>Territories</span>
@@ -854,17 +854,17 @@ export function SalesRepsPage() {
                 <span className="flex min-w-0 items-center gap-2.5">
                   <RepAvatar type={r.type} initials={r.initials} size={28} />
                   <span className="min-w-0">
-                    <span className="block truncate font-sans text-[13px] font-semibold text-bo-ink">
+                    <span className="block truncate font-sans text-[14px] font-semibold text-bo-ink">
                       {r.name}
                     </span>
-                    <span className="block truncate font-sans text-[11px] text-bo-muted-4">
+                    <span className="block truncate font-sans text-[12px] text-bo-muted-4">
                       {!r.isActive ? "Deactivated · " : !r.claimed ? "Invited · " : ""}
                       {r.email}
                     </span>
                   </span>
                 </span>
                 <span
-                  className={`w-fit rounded-full px-[9px] py-[3px] font-sans text-[11px] font-semibold whitespace-nowrap ${TYPE_PILL[r.type]}`}
+                  className={`w-fit rounded-full px-[9px] py-[3px] font-sans text-[12px] font-semibold whitespace-nowrap ${TYPE_PILL[r.type]}`}
                 >
                   {TYPE_LABEL[r.type]}
                 </span>
@@ -872,19 +872,19 @@ export function SalesRepsPage() {
                   {r.territories.map((t) => (
                     <span
                       key={t.id}
-                      className="rounded-md bg-[oklch(94%_0.012_70)] px-2 py-0.5 font-sans text-[11px] font-medium text-bo-muted-1"
+                      className="rounded-md bg-[oklch(94%_0.012_70)] px-2 py-0.5 font-sans text-[12px] font-medium text-bo-muted-1"
                     >
                       {t.name}
                     </span>
                   ))}
                   {r.territories.length === 0 && (
-                    <span className="font-sans text-[11px] text-bo-muted-5">No territory</span>
+                    <span className="font-sans text-[12px] text-bo-muted-5">No territory</span>
                   )}
                 </span>
-                <span className="hidden font-sans text-[13px] font-semibold text-bo-ink-soft md:block">
+                <span className="hidden font-sans text-[14px] font-semibold text-bo-ink-soft md:block">
                   {r.openLeads}
                 </span>
-                <span className="hidden font-sans text-[13px] font-semibold text-bo-ink-soft md:block">
+                <span className="hidden font-sans text-[14px] font-semibold text-bo-ink-soft md:block">
                   {r.liveThisMonth}
                 </span>
                 <span className="col-span-2 font-sans text-xs text-bo-muted-2 md:col-span-1">
@@ -897,11 +897,11 @@ export function SalesRepsPage() {
                 <div className="flex items-center gap-2.5">
                   <RepAvatar size={28} />
                   <div>
-                    <p className="m-0 font-sans text-[13px] font-semibold text-bo-ink">
+                    <p className="m-0 font-sans text-[14px] font-semibold text-bo-ink">
                       Unassigned pool · {reps.data.pool.openLeads} leads
                     </p>
                     {reps.data.pool.citiesWithoutRep.length > 0 && (
-                      <p className="m-0 font-sans text-[11px] text-bo-red">
+                      <p className="m-0 font-sans text-[12px] text-bo-red">
                         {reps.data.pool.citiesWithoutRep.join(", ")}{" "}
                         {reps.data.pool.citiesWithoutRep.length === 1 ? "has" : "have"} no rep yet
                       </p>
@@ -928,7 +928,7 @@ export function SalesRepsPage() {
           {byCity.map(([cityName, list]) => (
             <Card key={cityName} className="overflow-hidden">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-bo-border-soft px-5 py-3.5">
-                <p className="m-0 font-sans text-[15px] font-semibold text-bo-ink">
+                <p className="m-0 font-sans text-[16px] font-semibold text-bo-ink">
                   Territories · {cityName}
                 </p>
                 <span className="font-sans text-xs text-bo-muted-4">
@@ -942,7 +942,7 @@ export function SalesRepsPage() {
                   onClick={() => setTerritoryModal({ territory: t })}
                   className="grid w-full grid-cols-[1fr_auto] items-center gap-3 border-b border-bo-border-soft px-5 py-2.5 text-left last:border-b-0 hover:bg-bo-well sm:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,0.9fr)_minmax(0,0.5fr)]"
                 >
-                  <span className="font-sans text-[13px] font-semibold text-bo-ink">{t.name}</span>
+                  <span className="font-sans text-[14px] font-semibold text-bo-ink">{t.name}</span>
                   <span className="order-last col-span-2 font-sans text-xs text-bo-muted-3 sm:order-none sm:col-span-1">
                     {t.postalCodes.join(" · ") || "No postal codes"}
                   </span>
@@ -962,7 +962,7 @@ export function SalesRepsPage() {
 
         {settings && (
           <Card className="overflow-hidden">
-            <p className="m-0 border-b border-bo-border-soft px-4.5 py-3.5 font-sans text-[15px] font-semibold text-bo-ink">
+            <p className="m-0 border-b border-bo-border-soft px-4.5 py-3.5 font-sans text-[16px] font-semibold text-bo-ink">
               Ownership rules
             </p>
             {rulesFor(settings).map((r) => (
@@ -974,7 +974,7 @@ export function SalesRepsPage() {
                 className="flex w-full items-center justify-between gap-3.5 border-b border-bo-border-soft px-4.5 py-3 text-left last:border-b-0 enabled:hover:bg-bo-well"
               >
                 <span className="min-w-0">
-                  <span className="mb-0.5 block font-sans text-[13px] font-medium text-bo-ink-soft">
+                  <span className="mb-0.5 block font-sans text-[14px] font-medium text-bo-ink-soft">
                     {r.k}
                   </span>
                   <span className="block font-sans text-xs text-bo-muted-4">{r.v}</span>

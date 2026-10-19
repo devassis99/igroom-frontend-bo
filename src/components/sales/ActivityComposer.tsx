@@ -197,7 +197,7 @@ export function ActivityComposer({
                 outcome === o.key ? "border-2 border-bo-dark" : "border border-bo-input-border"
               }`}
             >
-              <span className="font-sans text-[15px] font-semibold text-bo-ink">{o.label}</span>
+              <span className="font-sans text-[16px] font-semibold text-bo-ink">{o.label}</span>
               <span className="font-sans text-xs font-medium text-bo-muted-4">{o.hint}</span>
             </button>
           ))}
@@ -227,7 +227,7 @@ export function ActivityComposer({
               ? "Anything the next person should know"
               : "What happened? Who did you talk to?"
         }
-        className="w-full resize-none rounded-[10px] border border-bo-border bg-[oklch(98.5%_0.006_80)] px-3 py-2.5 font-sans text-[13px] text-bo-ink outline-none focus:border-bo-gold"
+        className="w-full resize-none rounded-[10px] border border-bo-border bg-[oklch(98.5%_0.006_80)] px-3 py-2.5 font-sans text-[14px] text-bo-ink outline-none focus:border-bo-gold"
         aria-label="What happened"
       />
 

@@ -230,12 +230,12 @@ export function CloseLeadModal({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={2}
-              className={`${inputClass} resize-none text-[13px]`}
+              className={`${inputClass} resize-none text-[14px]`}
             />
           </label>
 
           {outcome === "lost" ? (
-            <label className="flex items-center gap-2 font-sans text-[13px] font-medium text-bo-ink-soft">
+            <label className="flex items-center gap-2 font-sans text-[14px] font-medium text-bo-ink-soft">
               <input
                 type="checkbox"
                 checked={returnToPool}

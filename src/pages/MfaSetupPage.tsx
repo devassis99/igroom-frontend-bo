@@ -32,7 +32,9 @@ export function MfaSetupPage() {
     authApi
       .beginMfaSetup(setupToken)
       .then(setDetails)
-      .catch((err) => setError(err instanceof ApiError ? err.message : "Could not start MFA setup."));
+      .catch((err) =>
+        setError(err instanceof ApiError ? err.message : "Could not start MFA setup."),
+      );
   }, [setupToken]);
 
   if (!setupToken) {
@@ -60,12 +62,10 @@ export function MfaSetupPage() {
     <main className="flex min-h-screen items-center justify-center bg-bo-page px-4">
       <div className="flex w-[380px] flex-col gap-6">
         <div className="flex flex-col items-center gap-1.5 text-center">
-          <p className="m-0 font-serif text-2xl font-semibold text-bo-ink">
-            Set up two-factor auth
-          </p>
-          <p className="m-0 font-sans text-[13px] text-bo-muted-3">
-            Scan with an authenticator app (Google Authenticator, Authy, 1Password), then enter
-            the 6-digit code it shows.
+          <p className="m-0 font-sans text-2xl font-semibold text-bo-ink">Set up two-factor auth</p>
+          <p className="m-0 font-sans text-[14px] text-bo-muted-3">
+            Scan with an authenticator app (Google Authenticator, Authy, 1Password), then enter the
+            6-digit code it shows.
           </p>
         </div>
 
@@ -77,9 +77,7 @@ export function MfaSetupPage() {
               className="mx-auto h-44 w-44"
             />
           ) : (
-            !error && (
-              <p className="m-0 text-center font-sans text-sm text-bo-muted-3">Loading…</p>
-            )
+            !error && <p className="m-0 text-center font-sans text-sm text-bo-muted-3">Loading…</p>
           )}
 
           <OtpInput
@@ -92,7 +90,7 @@ export function MfaSetupPage() {
             type="button"
             onClick={() => submit(code)}
             disabled={pending || code.length !== 6 || !details}
-            className="rounded-xl bg-bo-dark py-[15px] font-sans text-[15px] font-semibold text-bo-on-dark disabled:opacity-50"
+            className="rounded-xl bg-bo-dark py-[15px] font-sans text-[16px] font-semibold text-bo-on-dark disabled:opacity-50"
           >
             {pending ? "Verifying…" : "Confirm and finish setup"}
           </button>

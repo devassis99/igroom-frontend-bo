@@ -10,9 +10,21 @@ import { StatusPill } from "@/components/ui/StatusPill";
  */
 const STATS = [
   { label: "Failed Payments", value: "6", delta: { text: "↑ 2", tone: "danger" as const } },
-  { label: "Upcoming Renewals (7d)", value: "44", delta: { text: "↑ 8%", tone: "success" as const } },
-  { label: "Seat Upgrades This Month", value: "21", delta: { text: "↑ 15%", tone: "success" as const } },
-  { label: "Cancellations This Month", value: "5", delta: { text: "↑ 1", tone: "danger" as const } },
+  {
+    label: "Upcoming Renewals (7d)",
+    value: "44",
+    delta: { text: "↑ 8%", tone: "success" as const },
+  },
+  {
+    label: "Seat Upgrades This Month",
+    value: "21",
+    delta: { text: "↑ 15%", tone: "success" as const },
+  },
+  {
+    label: "Cancellations This Month",
+    value: "5",
+    delta: { text: "↑ 1", tone: "danger" as const },
+  },
 ];
 
 const RENEWAL_ROWS = [
@@ -44,7 +56,7 @@ export function BillingPage() {
       </div>
 
       <div className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface">
-        <div className="grid grid-cols-[1.6fr_1fr_1fr_0.9fr] bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4">
+        <div className="grid grid-cols-[1.6fr_1fr_1fr_0.9fr] bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4">
           <span>Shop</span>
           <span>Plan</span>
           <span>Next Charge</span>
@@ -57,7 +69,7 @@ export function BillingPage() {
               i < RENEWAL_ROWS.length - 1 ? "border-b border-bo-border-soft" : ""
             }`}
           >
-            <span className="font-sans text-[13px] font-semibold text-bo-ink">{row.shop}</span>
+            <span className="font-sans text-[14px] font-semibold text-bo-ink">{row.shop}</span>
             <span className="font-sans text-xs font-medium text-bo-muted-2">{row.plan}</span>
             <span className="font-sans text-xs font-medium text-bo-muted-2">{row.charge}</span>
             <StatusPill tone={row.tone}>{row.status}</StatusPill>

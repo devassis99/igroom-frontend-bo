@@ -23,7 +23,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 const FILTERABLE_STATUSES: ShopStatus[] = ["trial", "active", "past_due", "suspended", "cancelled"];
 
 const chipClass = (active: boolean) =>
-  `rounded-full px-3 py-1.5 font-sans text-[11px] font-semibold ${
+  `rounded-full px-3 py-1.5 font-sans text-[12px] font-semibold ${
     active
       ? "bg-bo-dark text-bo-on-dark"
       : "border border-bo-input-border bg-bo-surface text-bo-muted-2"
@@ -60,7 +60,7 @@ function SortableHeader({
     <button
       type="button"
       onClick={() => onSort(column)}
-      className={`flex items-center gap-1 font-sans text-[11px] font-semibold ${
+      className={`flex items-center gap-1 font-sans text-[12px] font-semibold ${
         align === "right" ? "justify-end" : ""
       } ${active ? "text-bo-ink" : "text-bo-muted-4"}`}
       // Not aria-sort: that attribute belongs on a columnheader, and this
@@ -193,7 +193,7 @@ export function ShopsPage() {
           placeholder="Search shops"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          className="w-60 rounded-lg border border-bo-input-border bg-bo-surface px-3.5 py-2.5 font-sans text-[13px] text-bo-ink outline-none focus:border-2 focus:border-bo-gold"
+          className="w-60 rounded-lg border border-bo-input-border bg-bo-surface px-3.5 py-2.5 font-sans text-[14px] text-bo-ink outline-none focus:border-2 focus:border-bo-gold"
         />
       </div>
 
@@ -325,10 +325,10 @@ export function ShopsPage() {
               }`}
             >
               <Link to={`/shops/${shop.id}`} className="flex flex-col items-start text-left">
-                <span className="font-sans text-[13px] font-semibold text-bo-ink hover:underline">
+                <span className="font-sans text-[14px] font-semibold text-bo-ink hover:underline">
                   {shop.name}
                 </span>
-                <span className="font-sans text-[11px] text-bo-muted-5">
+                <span className="font-sans text-[12px] text-bo-muted-5">
                   {shop.category ?? shop.email}
                   {shop.locationCount > 1 && ` · ${shop.locationCount} locations`}
                 </span>
@@ -337,12 +337,12 @@ export function ShopsPage() {
                 <span className="font-sans text-xs font-medium text-bo-muted-2">
                   {shop.planName}
                 </span>
-                <span className="font-sans text-[11px] text-bo-muted-5">
+                <span className="font-sans text-[12px] text-bo-muted-5">
                   {BILLING_INTERVAL_LABEL[shop.billingInterval]}
                 </span>
               </span>
               <span className="font-sans text-xs font-medium text-bo-muted-2">{shop.seats}</span>
-              <span className="font-sans text-[13px] font-semibold text-bo-ink-soft">
+              <span className="font-sans text-[14px] font-semibold text-bo-ink-soft">
                 {formatCents(shop.mrrCents, shop.currency)}
               </span>
               <StatusPill tone={SHOP_STATUS_TONE[shop.status]}>

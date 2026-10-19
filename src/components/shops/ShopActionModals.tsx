@@ -24,11 +24,11 @@ import {
  * target.
  */
 export const modalCancelButtonClass =
-  "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[13px] font-semibold text-bo-ink-soft";
+  "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 export const modalSubmitButtonClass =
-  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[13px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 export const modalDangerButtonClass =
-  "rounded-[10px] bg-bo-danger px-[18px] py-[11px] font-sans text-[13px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-danger px-[18px] py-[11px] font-sans text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
 
 export function errorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
@@ -245,7 +245,7 @@ export function ChangePlanModal({
               </span>
             )}
           </span>
-          <span className="font-sans text-[11px] leading-relaxed text-bo-muted-5">
+          <span className="font-sans text-[12px] leading-relaxed text-bo-muted-5">
             This re-points the account at the new price. No Stripe subscription is updated —
             checkout is still mocked, so no account has a live subscription to change yet.
           </span>
@@ -368,7 +368,7 @@ export function EditShopModal({
         </button>
       </div>
       <p className="-mt-2.5 m-0 font-sans text-xs text-bo-muted-5">
-        The URL slug (<code className="font-mono text-[11px]">{shop?.slug}</code>) isn't editable —
+        The URL slug (<code className="font-mono text-[12px]">{shop?.slug}</code>) isn't editable —
         it's the shop's public marketplace identifier.
       </p>
 
@@ -450,7 +450,7 @@ export function EditShopModal({
               </span>
             </label>
           </div>
-          <p className="m-0 -mt-2 font-sans text-[11px] leading-relaxed text-bo-muted-5">
+          <p className="m-0 -mt-2 font-sans text-[12px] leading-relaxed text-bo-muted-5">
             Listing requires the shop to be active with at least one active location — otherwise the
             listing would never appear in search, and the save is rejected.
           </p>

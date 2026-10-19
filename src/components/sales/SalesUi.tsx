@@ -47,7 +47,7 @@ export function StatusBadge({
   return (
     <span
       className={`inline-block w-fit whitespace-nowrap rounded-full font-sans font-semibold ${STATUS_CLASSES[status].pill} ${
-        size === "sm" ? "px-[7px] py-[2px] text-[10px]" : "px-[9px] py-[3px] text-[11px]"
+        size === "sm" ? "px-[7px] py-[2px] text-[11px]" : "px-[9px] py-[3px] text-[12px]"
       }`}
     >
       {label}
@@ -118,9 +118,9 @@ export function DueText({
 }
 
 export const primaryButtonClass =
-  "rounded-[10px] bg-bo-dark px-4 py-2.5 font-sans text-[13px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark px-4 py-2.5 font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 export const secondaryButtonClass =
-  "rounded-[10px] border border-bo-input-border bg-bo-surface px-3.5 py-2 font-sans text-[13px] font-medium text-bo-ink-soft disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] border border-bo-input-border bg-bo-surface px-3.5 py-2 font-sans text-[14px] font-medium text-bo-ink-soft disabled:cursor-not-allowed disabled:opacity-50";
 export const smallButtonClass =
   "inline-flex items-center justify-center rounded-lg border border-bo-input-border bg-bo-surface px-2.5 py-1.5 font-sans text-xs font-medium text-bo-ink-soft disabled:cursor-not-allowed disabled:opacity-40";
 export const linkButtonClass =
@@ -130,7 +130,7 @@ export const inputClass =
 export const selectClass =
   "rounded-lg border border-bo-input-border bg-bo-surface px-3 py-2 font-sans text-xs font-medium text-bo-ink-soft outline-none focus:border-bo-gold";
 export const labelClass =
-  "font-sans text-[11px] font-medium uppercase tracking-[0.04em] text-bo-muted-1";
+  "font-sans text-[12px] font-medium uppercase tracking-[0.04em] text-bo-muted-1";
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
@@ -273,7 +273,7 @@ export function PageHeader({
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0">
         <h1 className="m-0 mb-1 font-sans text-2xl font-semibold text-bo-ink">{title}</h1>
-        {subtitle && <p className="m-0 font-sans text-[13px] text-bo-muted-4">{subtitle}</p>}
+        {subtitle && <p className="m-0 font-sans text-[14px] text-bo-muted-4">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2.5">{actions}</div>}
     </div>
@@ -326,7 +326,7 @@ export function DensityMeter({
 export function ExplorePill({ on }: { on: boolean }) {
   return (
     <span
-      className={`rounded-full px-[9px] py-[3px] font-sans text-[11px] font-semibold ${
+      className={`rounded-full px-[9px] py-[3px] font-sans text-[12px] font-semibold ${
         on ? "bg-bo-success-bg text-bo-success" : "bg-bo-neutral-bg text-bo-muted-4"
       }`}
     >

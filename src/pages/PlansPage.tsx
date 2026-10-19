@@ -30,9 +30,9 @@ const filterSelectClass =
   "rounded-[9px] border border-bo-input-border bg-bo-surface px-3 py-2 font-sans text-xs font-medium text-bo-ink-soft outline-none";
 
 const modalCancelButtonClass =
-  "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[13px] font-semibold text-bo-ink-soft";
+  "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 const modalSubmitButtonClass =
-  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[13px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 
 /**
  * Derives a stable internal `key` from the display name (e.g. "Solo Chair"
@@ -314,7 +314,7 @@ function AddPriceModal({
           className={formInputClass}
         />
       </Field>
-      <p className="-mt-3 m-0 font-sans text-[11px] text-bo-muted-5">
+      <p className="-mt-3 m-0 font-sans text-[12px] text-bo-muted-5">
         Not saved yet — the API doesn't track a seat limit per price/cadence. Chair and location
         caps live on the product itself for now.
       </p>
@@ -580,7 +580,7 @@ function CreatePaymentLinkModal({
                 </div>
               </div>
             ))}
-            <p className="m-0 font-sans text-[11px] text-bo-muted-5">
+            <p className="m-0 font-sans text-[12px] text-bo-muted-5">
               {results.length === 1 ? "This link works" : "Each link works"} for one shop
               {results[0]?.expiresAt ? `, until ${shortExpiry(results[0].expiresAt)}` : ""} — it
               stops as soon as a shop signs up with it.
@@ -635,7 +635,7 @@ function CreatePaymentLinkModal({
                 />
               ))}
             </div>
-            <p className="m-0 font-sans text-[11px] text-bo-muted-5">
+            <p className="m-0 font-sans text-[12px] text-bo-muted-5">
               Pick one for a single-offer link, or several to generate one link per cycle — a link
               sells one price.
             </p>
@@ -661,7 +661,7 @@ function CreatePaymentLinkModal({
               />
             </Field>
           </div>
-          <p className="-mt-3 m-0 font-sans text-[11px] text-bo-muted-5">
+          <p className="-mt-3 m-0 font-sans text-[12px] text-bo-muted-5">
             Seat override is recorded on the link for reference — it doesn't change what's charged
             at checkout (a real per-seat quantity would multiply the price).
           </p>
@@ -704,7 +704,7 @@ function CreatePaymentLinkModal({
               ))}
             </select>
           </Field>
-          <p className="-mt-3 m-0 font-sans text-[11px] text-bo-muted-5">
+          <p className="-mt-3 m-0 font-sans text-[12px] text-bo-muted-5">
             The link stops working then — or as soon as a shop signs up with it, whichever comes
             first. Each link is for one shop.
           </p>
@@ -795,7 +795,7 @@ type DeleteTarget =
   | { kind: "product"; productId: string; product: string };
 
 const modalDangerButtonClass =
-  "rounded-[10px] bg-bo-danger px-[18px] py-[11px] font-sans text-[13px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-danger px-[18px] py-[11px] font-sans text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
 
 /**
  * In-app replacement for a native confirm() dialog — same Modal shell as
@@ -1106,8 +1106,8 @@ export function PlansPage() {
       <div className="mb-3.5 flex items-end justify-between">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-2">
-            <p className="m-0 font-sans text-[15px] font-semibold text-bo-ink">Stripe Products</p>
-            <span className="rounded-full bg-bo-stripe-bg px-2 py-0.5 font-sans text-[10px] font-semibold tracking-[0.02em] text-bo-stripe">
+            <p className="m-0 font-sans text-[16px] font-semibold text-bo-ink">Stripe Products</p>
+            <span className="rounded-full bg-bo-stripe-bg px-2 py-0.5 font-sans text-[11px] font-semibold tracking-[0.02em] text-bo-stripe">
               SYNCED WITH STRIPE
             </span>
           </div>
@@ -1166,7 +1166,7 @@ export function PlansPage() {
       </div>
 
       <div className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface">
-        <div className="grid grid-cols-[1.1fr_0.9fr_1fr_0.7fr_0.6fr_0.6fr_0.7fr_0.8fr_1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4">
+        <div className="grid grid-cols-[1.1fr_0.9fr_1fr_0.7fr_0.6fr_0.6fr_0.7fr_0.8fr_1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4">
           <span>PRODUCT</span>
           <span>BILLING CYCLE</span>
           <span>PRICE ID</span>
@@ -1196,7 +1196,7 @@ export function PlansPage() {
                   i > 0 ? "border-t border-bo-border-soft" : ""
                 }`}
               >
-                <span className="font-sans text-[13px] font-semibold text-bo-ink">
+                <span className="font-sans text-[14px] font-semibold text-bo-ink">
                   {row.product}
                 </span>
                 <span className="font-sans text-xs font-medium text-bo-muted-2">{row.cycle}</span>
@@ -1208,7 +1208,7 @@ export function PlansPage() {
                     navigator.clipboard?.writeText(row.priceId).catch(() => {});
                   }}
                   disabled={row.priceId === "—"}
-                  className="block w-full min-w-0 truncate pr-2 text-left font-mono text-[11px] text-bo-muted-4 disabled:cursor-default"
+                  className="block w-full min-w-0 truncate pr-2 text-left font-mono text-[12px] text-bo-muted-4 disabled:cursor-default"
                 >
                   {row.priceId}
                 </button>

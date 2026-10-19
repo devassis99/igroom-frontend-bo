@@ -13,9 +13,9 @@ import {
 import type { ShopStaff } from "@/lib/shops-api";
 
 const cancelButtonClass =
-  "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[13px] font-semibold text-bo-ink-soft";
+  "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 const submitButtonClass =
-  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[13px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 
 function errorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
@@ -50,12 +50,12 @@ function ReadyState({ started, onClose }: { started: StartedSupportSession; onCl
         <span className="font-sans text-sm font-semibold text-bo-ink">
           {started.staffUser.name}
           {started.staffUser.isOwner && (
-            <span className="ml-1.5 font-sans text-[10px] font-medium text-bo-muted-5">
+            <span className="ml-1.5 font-sans text-[11px] font-medium text-bo-muted-5">
               (owner)
             </span>
           )}
         </span>
-        <span className="font-sans text-[11px] text-bo-muted-5">
+        <span className="font-sans text-[12px] text-bo-muted-5">
           {started.staffUser.email}
           {started.staffUser.roleName && ` · ${started.staffUser.roleName}`}
         </span>
@@ -73,7 +73,7 @@ function ReadyState({ started, onClose }: { started: StartedSupportSession; onCl
         target="_blank"
         rel="noreferrer noopener"
         onClick={() => setOpened(true)}
-        className="rounded-[10px] bg-bo-dark px-[18px] py-[11px] text-center font-sans text-[13px] font-semibold text-bo-on-dark"
+        className="rounded-[10px] bg-bo-dark px-[18px] py-[11px] text-center font-sans text-[14px] font-semibold text-bo-on-dark"
       >
         Open {started.shopName} ↗
       </a>
@@ -175,7 +175,7 @@ function StartSupportSessionModal({
               ))}
             </select>
           </Field>
-          <p className="m-0 -mt-2 font-sans text-[11px] leading-relaxed text-bo-muted-5">
+          <p className="m-0 -mt-2 font-sans text-[12px] leading-relaxed text-bo-muted-5">
             Owner is right for most bug reports — it has every permission, so nothing fails for a
             reason unrelated to the bug. Pick a specific person when the report is permission-shaped
             ("my receptionist can't see the calendar").
@@ -288,12 +288,12 @@ export function SupportSessionSection({
               <span className="flex min-w-0 flex-col">
                 <span className="truncate font-sans text-xs font-semibold text-bo-ink-soft">
                   {session.boUserName}
-                  <span className="ml-1.5 font-sans text-[10px] font-medium text-bo-muted-5">
+                  <span className="ml-1.5 font-sans text-[11px] font-medium text-bo-muted-5">
                     as {session.staffUserName}
                     {session.staffRoleName ? ` · ${session.staffRoleName}` : ""}
                   </span>
                 </span>
-                <span className="truncate font-sans text-[11px] text-bo-muted-5">
+                <span className="truncate font-sans text-[12px] text-bo-muted-5">
                   {formatDateTime(session.startedAt)}
                   {session.reason ? ` · ${session.reason}` : ""}
                 </span>

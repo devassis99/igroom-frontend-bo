@@ -2,7 +2,7 @@
 export function LoadingScreen() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-bo-dark">
-      <p className="m-0 font-serif text-[34px] font-semibold tracking-wide text-bo-on-dark">
+      <p className="m-0 font-sans text-[30px] font-semibold tracking-wide text-bo-on-dark">
         iGroom <span className="font-sans text-sm font-medium text-bo-page/80">Backoffice</span>
       </p>
       <div

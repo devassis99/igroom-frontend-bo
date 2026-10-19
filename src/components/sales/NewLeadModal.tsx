@@ -248,7 +248,7 @@ export function NewLeadModal({
             !
           </span>
           <div className="min-w-0 flex-1">
-            <p className="m-0 mb-0.5 font-sans text-[13px] font-semibold text-bo-ink-soft">
+            <p className="m-0 mb-0.5 font-sans text-[14px] font-semibold text-bo-ink-soft">
               Possible duplicate: {top.name}
               {duplicates.length > 1 ? ` (+${duplicates.length - 1} more)` : ""}
             </p>

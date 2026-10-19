@@ -13,14 +13,16 @@ import {
 } from "@/lib/users-api";
 
 const modalCancelButtonClass =
-  "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[13px] font-semibold text-bo-ink-soft";
+  "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 const modalSubmitButtonClass =
-  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[13px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 const modalDangerButtonClass =
-  "rounded-[10px] bg-bo-danger px-[18px] py-[11px] font-sans text-[13px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-danger px-[18px] py-[11px] font-sans text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
 const tabButtonClass = (active: boolean) =>
   `rounded-[10px] px-3.5 py-2 font-sans text-xs font-semibold ${
-    active ? "bg-bo-dark text-bo-on-dark" : "border border-bo-input-border bg-bo-surface text-bo-ink-soft"
+    active
+      ? "bg-bo-dark text-bo-on-dark"
+      : "border border-bo-input-border bg-bo-surface text-bo-ink-soft"
   }`;
 const smallSelectClass =
   "rounded-[8px] border border-bo-input-border bg-bo-surface px-2.5 py-1.5 font-sans text-xs font-medium text-bo-ink-soft outline-none disabled:cursor-not-allowed disabled:opacity-50";
@@ -31,7 +33,11 @@ function errorMessage(error: unknown, fallback: string): string {
 
 function formatDate(iso: string | null): string {
   if (!iso) return "Never";
-  return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return new Date(iso).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 /**
@@ -79,7 +85,12 @@ function InviteUserModal({
     <Modal open={open} onClose={handleClose}>
       <div className="flex items-start justify-between">
         <h1 className="m-0 font-sans text-xl font-semibold text-bo-ink">Invite User</h1>
-        <button type="button" onClick={handleClose} aria-label="Close" className="font-sans text-xl text-bo-muted-5">
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Close"
+          className="font-sans text-xl text-bo-muted-5"
+        >
           ×
         </button>
       </div>
@@ -109,7 +120,11 @@ function InviteUserModal({
       </Field>
 
       <Field label="ROLE">
-        <select value={roleId} onChange={(e) => setRoleId(e.target.value)} className={formInputClass}>
+        <select
+          value={roleId}
+          onChange={(e) => setRoleId(e.target.value)}
+          className={formInputClass}
+        >
           {roles.length === 0 && <option value="">No roles yet — create one first</option>}
           {roles.map((role) => (
             <option key={role.id} value={role.id}>
@@ -120,7 +135,9 @@ function InviteUserModal({
       </Field>
 
       <div className="flex flex-col gap-1.5 rounded-[10px] bg-bo-table-head p-3.5">
-        <span className="font-sans text-xs font-medium tracking-[0.02em] text-bo-muted-1">HEADS UP</span>
+        <span className="font-sans text-xs font-medium tracking-[0.02em] text-bo-muted-1">
+          HEADS UP
+        </span>
         <span className="font-sans text-xs leading-relaxed text-bo-muted-4">
           No email is sent automatically — tell them directly to sign in at the back office login
           page with this exact Google account.
@@ -128,14 +145,21 @@ function InviteUserModal({
       </div>
 
       {invite.isError && (
-        <p className="m-0 font-sans text-xs text-bo-danger">{errorMessage(invite.error, "Failed to invite user.")}</p>
+        <p className="m-0 font-sans text-xs text-bo-danger">
+          {errorMessage(invite.error, "Failed to invite user.")}
+        </p>
       )}
 
       <div className="flex justify-end gap-2.5 pt-1.5">
         <button type="button" onClick={handleClose} className={modalCancelButtonClass}>
           Cancel
         </button>
-        <button type="button" onClick={() => invite.mutate()} disabled={!canSubmit} className={modalSubmitButtonClass}>
+        <button
+          type="button"
+          onClick={() => invite.mutate()}
+          disabled={!canSubmit}
+          className={modalSubmitButtonClass}
+        >
           {invite.isPending ? "Inviting…" : "Send Invite"}
         </button>
       </div>
@@ -182,7 +206,12 @@ function ToggleActiveModal({
         <h1 className="m-0 font-sans text-xl font-semibold text-bo-ink">
           {verb} {target?.name}?
         </h1>
-        <button type="button" onClick={handleClose} aria-label="Close" className="font-sans text-xl text-bo-muted-5">
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Close"
+          className="font-sans text-xl text-bo-muted-5"
+        >
           ×
         </button>
       </div>
@@ -254,20 +283,24 @@ function UsersTab({
     <div>
       <div className="mb-3.5 flex items-end justify-between">
         <div className="flex flex-col gap-0.5">
-          <p className="m-0 font-sans text-[15px] font-semibold text-bo-ink">Back-Office Users</p>
+          <p className="m-0 font-sans text-[16px] font-semibold text-bo-ink">Back-Office Users</p>
           <p className="m-0 font-sans text-xs text-bo-muted-5">
             Invite teammates and control what they can see and do in this app.
           </p>
         </div>
         {canManage && (
-          <button type="button" onClick={() => setInviteOpen(true)} className={tabButtonClass(false)}>
+          <button
+            type="button"
+            onClick={() => setInviteOpen(true)}
+            className={tabButtonClass(false)}
+          >
             + Invite User
           </button>
         )}
       </div>
 
       <div className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface">
-        <div className="grid grid-cols-[1.2fr_1.4fr_1.1fr_1fr_0.9fr_1.1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4">
+        <div className="grid grid-cols-[1.2fr_1.4fr_1.1fr_1fr_0.9fr_1.1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4">
           <span>NAME</span>
           <span>EMAIL</span>
           <span>ROLE</span>
@@ -293,11 +326,17 @@ function UsersTab({
                   i > 0 ? "border-t border-bo-border-soft" : ""
                 }`}
               >
-                <span className="font-sans text-[13px] font-semibold text-bo-ink">
+                <span className="font-sans text-[14px] font-semibold text-bo-ink">
                   {user.name}
-                  {isSelf && <span className="ml-1.5 font-sans text-[10px] font-medium text-bo-muted-5">(you)</span>}
+                  {isSelf && (
+                    <span className="ml-1.5 font-sans text-[11px] font-medium text-bo-muted-5">
+                      (you)
+                    </span>
+                  )}
                 </span>
-                <span className="truncate font-sans text-xs font-medium text-bo-muted-2">{user.email}</span>
+                <span className="truncate font-sans text-xs font-medium text-bo-muted-2">
+                  {user.email}
+                </span>
                 {canManage ? (
                   <select
                     value={user.roleId}
@@ -313,7 +352,9 @@ function UsersTab({
                     ))}
                   </select>
                 ) : (
-                  <span className="font-sans text-xs font-medium text-bo-muted-2">{user.roleName}</span>
+                  <span className="font-sans text-xs font-medium text-bo-muted-2">
+                    {user.roleName}
+                  </span>
                 )}
                 <div className="flex flex-wrap gap-1.5">
                   <StatusPill tone={user.isActive ? "success" : "danger"}>
@@ -321,13 +362,19 @@ function UsersTab({
                   </StatusPill>
                   {!user.claimed && <StatusPill tone="gold">Pending Invite</StatusPill>}
                 </div>
-                <span className="font-sans text-xs font-medium text-bo-muted-2">{formatDate(user.lastLoginAt)}</span>
+                <span className="font-sans text-xs font-medium text-bo-muted-2">
+                  {formatDate(user.lastLoginAt)}
+                </span>
                 <div className="flex justify-end">
                   {canManage && !isSelf && (
                     <button
                       type="button"
                       onClick={() =>
-                        setToggleTarget({ userId: user.id, name: user.name, nextIsActive: !user.isActive })
+                        setToggleTarget({
+                          userId: user.id,
+                          name: user.name,
+                          nextIsActive: !user.isActive,
+                        })
                       }
                       className={`font-sans text-xs font-semibold ${
                         user.isActive ? "text-bo-danger" : "text-bo-ink-soft"
@@ -393,7 +440,11 @@ function RoleFormModal({
   const save = useMutation({
     mutationFn: () => {
       if (mode === "create") {
-        return rolesApi.create({ name: name.trim(), description: description.trim() || undefined, permissionKeys: selectedKeys });
+        return rolesApi.create({
+          name: name.trim(),
+          description: description.trim() || undefined,
+          permissionKeys: selectedKeys,
+        });
       }
       if (!boRole) throw new Error("No role selected.");
       return rolesApi.updatePermissions(boRole.id, selectedKeys);
@@ -410,7 +461,9 @@ function RoleFormModal({
   }
 
   function toggleKey(key: string) {
-    setSelectedKeys((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+    setSelectedKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
   }
 
   const canSubmit = (mode === "edit" || name.trim().length > 0) && !save.isPending;
@@ -421,7 +474,12 @@ function RoleFormModal({
         <h1 className="m-0 font-sans text-xl font-semibold text-bo-ink">
           {mode === "create" ? "New Role" : `Edit "${boRole?.name}" permissions`}
         </h1>
-        <button type="button" onClick={handleClose} aria-label="Close" className="font-sans text-xl text-bo-muted-5">
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Close"
+          className="font-sans text-xl text-bo-muted-5"
+        >
           ×
         </button>
       </div>
@@ -466,9 +524,13 @@ function RoleFormModal({
                 className="mt-0.5"
               />
               <span className="flex flex-col">
-                <span className="font-sans text-xs font-semibold text-bo-ink-soft">{permission.name}</span>
+                <span className="font-sans text-xs font-semibold text-bo-ink-soft">
+                  {permission.name}
+                </span>
                 {permission.description && (
-                  <span className="font-sans text-[11px] text-bo-muted-5">{permission.description}</span>
+                  <span className="font-sans text-[12px] text-bo-muted-5">
+                    {permission.description}
+                  </span>
                 )}
               </span>
             </label>
@@ -477,14 +539,21 @@ function RoleFormModal({
       </div>
 
       {save.isError && (
-        <p className="m-0 font-sans text-xs text-bo-danger">{errorMessage(save.error, "Failed to save role.")}</p>
+        <p className="m-0 font-sans text-xs text-bo-danger">
+          {errorMessage(save.error, "Failed to save role.")}
+        </p>
       )}
 
       <div className="flex justify-end gap-2.5 pt-1.5">
         <button type="button" onClick={handleClose} className={modalCancelButtonClass}>
           Cancel
         </button>
-        <button type="button" onClick={() => save.mutate()} disabled={!canSubmit} className={modalSubmitButtonClass}>
+        <button
+          type="button"
+          onClick={() => save.mutate()}
+          disabled={!canSubmit}
+          className={modalSubmitButtonClass}
+        >
           {save.isPending ? "Saving…" : mode === "create" ? "Create Role" : "Save Permissions"}
         </button>
       </div>
@@ -520,7 +589,12 @@ function DeleteRoleModal({
     <Modal open={target !== null} onClose={handleClose}>
       <div className="flex items-start justify-between">
         <h1 className="m-0 font-sans text-xl font-semibold text-bo-ink">Delete {target?.name}?</h1>
-        <button type="button" onClick={handleClose} aria-label="Close" className="font-sans text-xl text-bo-muted-5">
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Close"
+          className="font-sans text-xl text-bo-muted-5"
+        >
           ×
         </button>
       </div>
@@ -529,7 +603,9 @@ function DeleteRoleModal({
       </p>
 
       {mutation.isError && (
-        <p className="m-0 font-sans text-xs text-bo-danger">{errorMessage(mutation.error, "Failed to delete role.")}</p>
+        <p className="m-0 font-sans text-xs text-bo-danger">
+          {errorMessage(mutation.error, "Failed to delete role.")}
+        </p>
       )}
 
       <div className="flex justify-end gap-2.5 pt-1.5">
@@ -572,21 +648,25 @@ function RolesTab({
     <div>
       <div className="mb-3.5 flex items-end justify-between">
         <div className="flex flex-col gap-0.5">
-          <p className="m-0 font-sans text-[15px] font-semibold text-bo-ink">Roles</p>
+          <p className="m-0 font-sans text-[16px] font-semibold text-bo-ink">Roles</p>
           <p className="m-0 font-sans text-xs text-bo-muted-5">
             Each role controls which tabs and API actions its users get — enforced on both the
             frontend and the backend.
           </p>
         </div>
         {canManage && (
-          <button type="button" onClick={() => setNewRoleOpen(true)} className={tabButtonClass(false)}>
+          <button
+            type="button"
+            onClick={() => setNewRoleOpen(true)}
+            className={tabButtonClass(false)}
+          >
             + New Role
           </button>
         )}
       </div>
 
       <div className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface">
-        <div className="grid grid-cols-[1fr_1.6fr_0.9fr_0.7fr_1.1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4">
+        <div className="grid grid-cols-[1fr_1.6fr_0.9fr_0.7fr_1.1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4">
           <span>ROLE</span>
           <span>DESCRIPTION</span>
           <span>PERMISSIONS</span>
@@ -609,12 +689,16 @@ function RolesTab({
                 i > 0 ? "border-t border-bo-border-soft" : ""
               }`}
             >
-              <span className="font-sans text-[13px] font-semibold text-bo-ink">{role.name}</span>
+              <span className="font-sans text-[14px] font-semibold text-bo-ink">{role.name}</span>
               <span className="truncate font-sans text-xs font-medium text-bo-muted-2">
                 {role.description || "—"}
               </span>
-              <span className="font-sans text-xs font-medium text-bo-muted-2">{role.permissions.length}</span>
-              <span className="font-sans text-xs font-medium text-bo-muted-2">{role.userCount}</span>
+              <span className="font-sans text-xs font-medium text-bo-muted-2">
+                {role.permissions.length}
+              </span>
+              <span className="font-sans text-xs font-medium text-bo-muted-2">
+                {role.userCount}
+              </span>
               <div className="flex items-center justify-end gap-2.5">
                 {canManage && (
                   <button
@@ -690,10 +774,18 @@ export function UsersPage() {
       <h1 className="m-0 mb-5 font-sans text-2xl font-semibold text-bo-ink">User Management</h1>
 
       <div className="mb-4 flex gap-2">
-        <button type="button" onClick={() => setTab("users")} className={tabButtonClass(tab === "users")}>
+        <button
+          type="button"
+          onClick={() => setTab("users")}
+          className={tabButtonClass(tab === "users")}
+        >
           Users
         </button>
-        <button type="button" onClick={() => setTab("roles")} className={tabButtonClass(tab === "roles")}>
+        <button
+          type="button"
+          onClick={() => setTab("roles")}
+          className={tabButtonClass(tab === "roles")}
+        >
           Roles & Permissions
         </button>
       </div>

@@ -43,10 +43,10 @@ export function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-bo-page px-4">
       <div className="flex w-[380px] flex-col gap-6">
         <div className="flex flex-col items-center gap-1.5 text-center">
-          <p className="m-0 font-serif text-2xl font-semibold text-bo-ink">
+          <p className="m-0 font-sans text-2xl font-semibold text-bo-ink">
             iGroom <span className="font-sans text-xs font-medium text-bo-muted-5">Backoffice</span>
           </p>
-          <p className="m-0 font-sans text-[13px] text-bo-muted-3">Internal access only</p>
+          <p className="m-0 font-sans text-[14px] text-bo-muted-3">Internal access only</p>
         </div>
 
         <div className="flex flex-col gap-4 rounded-2xl border border-bo-border bg-bo-surface p-[26px]">
@@ -66,7 +66,7 @@ export function LoginPage() {
           )}
         </div>
 
-        <p className="m-0 text-center font-sans text-[11px] text-bo-muted-6">
+        <p className="m-0 text-center font-sans text-[12px] text-bo-muted-6">
           Access restricted to authorized iGroom staff Google accounts. All sign-ins are logged.
         </p>
 

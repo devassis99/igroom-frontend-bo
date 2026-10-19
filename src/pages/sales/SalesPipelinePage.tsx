@@ -188,34 +188,34 @@ function BoardCard({
       className={`flex flex-col gap-2 rounded-[10px] border border-[oklch(90%_0.012_62)] bg-bo-surface p-3 hover:border-bo-muted-6 ${draggable ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
       <div>
-        <p className="m-0 mb-0.5 font-sans text-[13px] font-semibold text-bo-ink">
+        <p className="m-0 mb-0.5 font-sans text-[14px] font-semibold text-bo-ink">
           {lead.shopName}
         </p>
-        <p className="m-0 font-sans text-[11px] text-bo-muted-4">
+        <p className="m-0 font-sans text-[12px] text-bo-muted-4">
           {[lead.area, chairsLabel(lead.chairs)].filter(Boolean).join(" · ")}
         </p>
       </div>
       {(lead.currentTool || lead.isAuto || lead.needsPhone) && (
         <div className="flex flex-wrap gap-1">
           {lead.currentTool && (
-            <span className="rounded-md bg-[oklch(94%_0.012_70)] px-[7px] py-[2px] font-sans text-[10px] font-medium text-bo-muted-2">
+            <span className="rounded-md bg-[oklch(94%_0.012_70)] px-[7px] py-[2px] font-sans text-[11px] font-medium text-bo-muted-2">
               {lead.currentTool}
             </span>
           )}
           {lead.isAuto && (
-            <span className="rounded-md bg-bo-gold-tint px-[7px] py-[2px] font-sans text-[10px] font-semibold text-bo-gold">
+            <span className="rounded-md bg-bo-gold-tint px-[7px] py-[2px] font-sans text-[11px] font-semibold text-bo-gold">
               Auto · {lead.sourceLabel}
             </span>
           )}
           {lead.needsPhone && (
-            <span className="rounded-md bg-bo-danger-bg px-[7px] py-[2px] font-sans text-[10px] font-semibold text-bo-red">
+            <span className="rounded-md bg-bo-danger-bg px-[7px] py-[2px] font-sans text-[11px] font-semibold text-bo-red">
               No phone
             </span>
           )}
         </div>
       )}
       <div className="flex items-center justify-between">
-        <DueText at={lead.nextFollowUpAt} className="text-[11px]" long />
+        <DueText at={lead.nextFollowUpAt} className="text-[12px]" long />
         <RepAvatar rep={lead.rep} />
       </div>
     </Link>
@@ -324,7 +324,7 @@ function Board({
                 <span className="flex-1 font-sans text-xs font-semibold text-bo-ink-soft">
                   {col.label}
                 </span>
-                <span className="font-sans text-[11px] font-semibold text-bo-muted-4">
+                <span className="font-sans text-[12px] font-semibold text-bo-muted-4">
                   {col.count}
                 </span>
               </div>
@@ -338,7 +338,7 @@ function Board({
                   />
                 ))}
                 {col.cards.length === 0 && (
-                  <p className="m-0 px-1 py-2 font-sans text-[11px] text-bo-muted-5">
+                  <p className="m-0 px-1 py-2 font-sans text-[12px] text-bo-muted-5">
                     Nothing here
                   </p>
                 )}
@@ -357,16 +357,16 @@ function Board({
         })}
       </div>
       <div className="flex flex-wrap items-center gap-x-4.5 gap-y-1.5">
-        <span className="flex items-center gap-1.5 font-sans text-[11px] text-bo-muted-3">
+        <span className="flex items-center gap-1.5 font-sans text-[12px] text-bo-muted-3">
           <RepAvatar type="employee" size={14} /> Employee
         </span>
-        <span className="flex items-center gap-1.5 font-sans text-[11px] text-bo-muted-3">
+        <span className="flex items-center gap-1.5 font-sans text-[12px] text-bo-muted-3">
           <RepAvatar type="agent" size={14} /> Commission agent
         </span>
-        <span className="flex items-center gap-1.5 font-sans text-[11px] text-bo-muted-3">
+        <span className="flex items-center gap-1.5 font-sans text-[12px] text-bo-muted-3">
           <RepAvatar size={14} /> Unassigned pool
         </span>
-        <span className="font-sans text-[11px] text-bo-muted-3">
+        <span className="font-sans text-[12px] text-bo-muted-3">
           Drag a card to change status. Onboarding and Live update on their own from the shop's
           account.
         </span>
@@ -401,7 +401,7 @@ function Table({
       {/* Desktop table — B9c */}
       <div className="hidden overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface md:block">
         <div
-          className={`grid ${TABLE_GRID} gap-2.5 bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4`}
+          className={`grid ${TABLE_GRID} gap-2.5 bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4`}
         >
           <span>Shop</span>
           <span>Area</span>
@@ -419,7 +419,7 @@ function Table({
             to={`/sales/leads/${l.id}`}
             className={`grid ${TABLE_GRID} items-center gap-2.5 border-b border-bo-border-soft px-5 py-[11px] last:border-b-0 hover:bg-bo-well`}
           >
-            <span className="truncate font-sans text-[13px] font-semibold text-bo-ink">
+            <span className="truncate font-sans text-[14px] font-semibold text-bo-ink">
               {l.shopName}
             </span>
             <span className="truncate font-sans text-xs text-bo-muted-2">{l.area ?? "—"}</span>
@@ -427,7 +427,7 @@ function Table({
             <span className="flex min-w-0 items-center gap-1.5 font-sans text-xs text-bo-muted-2">
               <span className="truncate">{l.sourceLabel}</span>
               {l.isAuto && (
-                <span className="shrink-0 rounded bg-bo-gold-tint px-[5px] py-px font-sans text-[9px] font-semibold tracking-[0.04em] text-bo-gold">
+                <span className="shrink-0 rounded bg-bo-gold-tint px-[5px] py-px font-sans text-[11px] font-semibold tracking-[0.04em] text-bo-gold">
                   AUTO
                 </span>
               )}
@@ -465,7 +465,7 @@ function Table({
               <StatusBadge status={l.status} label={l.statusLabel} />
               <DueText at={l.nextFollowUpAt} long />
             </div>
-            <p className="m-0 font-sans text-[15px] font-semibold text-bo-ink">{l.shopName}</p>
+            <p className="m-0 font-sans text-[16px] font-semibold text-bo-ink">{l.shopName}</p>
             <p className="m-0 font-sans text-xs text-bo-muted-3">
               {[l.area, chairsLabel(l.chairs), l.currentTool, l.rep?.shortName ?? "Pool"]
                 .filter(Boolean)
@@ -684,7 +684,7 @@ export function SalesPipelinePage() {
       <button
         type="button"
         onClick={() => setNewOpen(true)}
-        className="fixed right-5 bottom-[88px] z-30 flex h-14 items-center rounded-full bg-bo-dark px-5.5 font-sans text-[15px] font-semibold text-bo-on-dark shadow-[0_10px_24px_-8px_rgba(20,15,5,0.5)] sm:hidden"
+        className="fixed right-5 bottom-[88px] z-30 flex h-14 items-center rounded-full bg-bo-dark px-5.5 font-sans text-[16px] font-semibold text-bo-on-dark shadow-[0_10px_24px_-8px_rgba(20,15,5,0.5)] sm:hidden"
       >
         + Lead
       </button>

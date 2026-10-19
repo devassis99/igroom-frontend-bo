@@ -65,7 +65,7 @@ function TodayRow({
           onClick={() => navigate(`/sales/leads/${lead.id}`)}
           className="min-w-0 text-left"
         >
-          <p className="m-0 mb-0.5 truncate font-sans text-[13px] font-semibold text-bo-ink">
+          <p className="m-0 mb-0.5 truncate font-sans text-[14px] font-semibold text-bo-ink">
             {lead.shopName}{" "}
             <span className="font-normal text-bo-muted-5">
               {lead.area ? `· ${lead.area}` : ""}
@@ -106,16 +106,16 @@ function TodayRow({
           )}
         </div>
         <Link to={`/sales/leads/${lead.id}`} className="block">
-          <p className="m-0 mb-0.5 font-sans text-[15px] font-semibold text-bo-ink">
+          <p className="m-0 mb-0.5 font-sans text-[16px] font-semibold text-bo-ink">
             {lead.shopName}
           </p>
-          <p className="m-0 font-sans text-[13px] text-bo-muted-2">{taskLine(lead)}</p>
+          <p className="m-0 font-sans text-[14px] text-bo-muted-2">{taskLine(lead)}</p>
         </Link>
         <div className="grid grid-cols-3 gap-1.5">
           <a
             href={lead.phone ? telHref(lead.phone) : undefined}
             aria-disabled={!lead.phone}
-            className={`flex h-10 items-center justify-center rounded-[10px] border border-bo-input-border font-sans text-[13px] font-semibold text-bo-ink-soft ${lead.phone ? "" : "pointer-events-none opacity-40"}`}
+            className={`flex h-10 items-center justify-center rounded-[10px] border border-bo-input-border font-sans text-[14px] font-semibold text-bo-ink-soft ${lead.phone ? "" : "pointer-events-none opacity-40"}`}
           >
             Call
           </a>
@@ -124,14 +124,14 @@ function TodayRow({
             target="_blank"
             rel="noreferrer"
             aria-disabled={!directions}
-            className={`flex h-10 items-center justify-center rounded-[10px] border border-bo-input-border font-sans text-[13px] font-semibold text-bo-ink-soft ${directions ? "" : "pointer-events-none opacity-40"}`}
+            className={`flex h-10 items-center justify-center rounded-[10px] border border-bo-input-border font-sans text-[14px] font-semibold text-bo-ink-soft ${directions ? "" : "pointer-events-none opacity-40"}`}
           >
             Directions
           </a>
           <button
             type="button"
             onClick={() => onLog(lead)}
-            className="flex h-10 items-center justify-center rounded-[10px] border border-bo-input-border font-sans text-[13px] font-semibold text-bo-ink-soft"
+            className="flex h-10 items-center justify-center rounded-[10px] border border-bo-input-border font-sans text-[14px] font-semibold text-bo-ink-soft"
           >
             Log
           </button>
@@ -167,7 +167,7 @@ function Section({
     <Card className="overflow-hidden">
       <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 border-b border-bo-border-soft px-5 py-3.5">
         <p
-          className={`m-0 font-sans text-[15px] font-semibold ${tone === "danger" ? "text-bo-red" : "text-bo-ink"}`}
+          className={`m-0 font-sans text-[16px] font-semibold ${tone === "danger" ? "text-bo-red" : "text-bo-ink"}`}
         >
           {title}
         </p>
@@ -249,7 +249,7 @@ function Approvals({ data }: { data: TodayResponse }) {
   return (
     <Card className="overflow-hidden border-[oklch(72%_0.09_85/0.6)]">
       <div className="flex items-baseline gap-2.5 border-b border-bo-border-soft bg-bo-gold-bg px-5 py-3.5">
-        <p className="m-0 font-sans text-[15px] font-semibold text-bo-ink">Waiting on you</p>
+        <p className="m-0 font-sans text-[16px] font-semibold text-bo-ink">Waiting on you</p>
         <span className="font-sans text-xs text-bo-muted-2">
           {a.invites.length + a.reassignments.length} to decide
         </span>
@@ -260,7 +260,7 @@ function Approvals({ data }: { data: TodayResponse }) {
           className="flex flex-col gap-2 border-b border-bo-border-soft px-5 py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
         >
           <div className="min-w-0">
-            <p className="m-0 font-sans text-[13px] font-semibold text-bo-ink">
+            <p className="m-0 font-sans text-[14px] font-semibold text-bo-ink">
               <Link to={`/sales/leads/${i.leadId}`} className="hover:underline">
                 {i.shopName}
               </Link>{" "}
@@ -296,7 +296,7 @@ function Approvals({ data }: { data: TodayResponse }) {
           className="flex flex-col gap-2 border-b border-bo-border-soft px-5 py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
         >
           <div className="min-w-0">
-            <p className="m-0 font-sans text-[13px] font-semibold text-bo-ink">
+            <p className="m-0 font-sans text-[14px] font-semibold text-bo-ink">
               <Link to={`/sales/leads/${r.leadId}`} className="hover:underline">
                 {r.shopName}
               </Link>{" "}
@@ -388,7 +388,7 @@ function PickLeadModal({
             onClick={() => onPick(lead)}
             className="flex items-center justify-between gap-3 border-b border-bo-border-soft px-1 py-2.5 text-left last:border-b-0 hover:bg-bo-well"
           >
-            <span className="min-w-0 truncate font-sans text-[13px] font-semibold text-bo-ink">
+            <span className="min-w-0 truncate font-sans text-[14px] font-semibold text-bo-ink">
               {lead.shopName}{" "}
               <span className="font-normal text-bo-muted-5">
                 {lead.area ? `· ${lead.area}` : ""}
@@ -533,7 +533,7 @@ export function SalesTodayPage() {
             {data.density && (
               <Card className="flex flex-col gap-3 p-5">
                 <div className="flex items-center justify-between">
-                  <p className="m-0 font-sans text-[15px] font-semibold text-bo-ink">
+                  <p className="m-0 font-sans text-[16px] font-semibold text-bo-ink">
                     {data.density.cityName} density
                   </p>
                   <ExplorePill on={data.density.exploreOn} />
@@ -554,14 +554,14 @@ export function SalesTodayPage() {
                   {data.density.onboardingNames.length > 0 &&
                     `${data.density.onboardingNames.join(" and ")} ${data.density.onboardingNames.length === 1 ? "is" : "are"} onboarding.`}
                 </p>
-                <p className="m-0 font-sans text-[11px] text-bo-muted-5">
+                <p className="m-0 font-sans text-[12px] text-bo-muted-5">
                   Live = taking online bookings, with opening hours set.
                 </p>
               </Card>
             )}
             {data.week && (
               <Card className="p-5">
-                <p className="m-0 mb-3.5 font-sans text-[15px] font-semibold text-bo-ink">
+                <p className="m-0 mb-3.5 font-sans text-[16px] font-semibold text-bo-ink">
                   My week
                 </p>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-4">
@@ -572,16 +572,16 @@ export function SalesTodayPage() {
                   ].map(([label, value]) => (
                     <div key={label}>
                       <span className="font-sans text-xs text-bo-muted-4">{label}</span>
-                      <p className="m-0 mt-1 font-sans text-[22px] font-bold text-bo-ink">
+                      <p className="m-0 mt-1 font-sans text-[20px] font-bold text-bo-ink">
                         {value}
                       </p>
                     </div>
                   ))}
                   <div>
                     <span className="font-sans text-xs text-bo-muted-4">Commission</span>
-                    <p className="m-0 mt-1 font-sans text-[22px] font-bold text-bo-ink">
+                    <p className="m-0 mt-1 font-sans text-[20px] font-bold text-bo-ink">
                       {formatMoney(data.week.commissionPendingCents, data.week.currency)}{" "}
-                      <span className="font-sans text-[11px] font-medium text-bo-muted-4">
+                      <span className="font-sans text-[12px] font-medium text-bo-muted-4">
                         pending
                       </span>
                     </p>
@@ -597,7 +597,7 @@ export function SalesTodayPage() {
       <button
         type="button"
         onClick={() => setNewOpen(true)}
-        className="fixed right-5 bottom-[88px] z-30 flex h-14 items-center rounded-full bg-bo-dark px-5.5 font-sans text-[15px] font-semibold text-bo-on-dark shadow-[0_10px_24px_-8px_rgba(20,15,5,0.5)] md:hidden"
+        className="fixed right-5 bottom-[88px] z-30 flex h-14 items-center rounded-full bg-bo-dark px-5.5 font-sans text-[16px] font-semibold text-bo-on-dark shadow-[0_10px_24px_-8px_rgba(20,15,5,0.5)] md:hidden"
       >
         + Lead
       </button>

@@ -86,7 +86,7 @@ const SALES_TABS: Array<{ to: string; label: string; also?: string[]; round?: bo
 function NavIcon({ shape, active }: { shape: Shape; active: boolean }) {
   if (shape === "gear") {
     return (
-      <span className="font-sans text-[15px] leading-4" aria-hidden>
+      <span className="font-sans text-[16px] leading-4" aria-hidden>
         ⚙
       </span>
     );
@@ -200,7 +200,7 @@ export function AppShell() {
       <NavLink
         key={item.to}
         to={item.to}
-        className={`flex items-center gap-3 px-6 py-2.5 font-sans text-[13px] ${
+        className={`flex items-center gap-3 px-6 py-2.5 font-sans text-[14px] ${
           active ? "bg-bo-dark font-semibold text-bo-on-dark" : "font-medium text-bo-nav-inactive"
         }`}
         aria-current={active ? "page" : undefined}
@@ -209,7 +209,7 @@ export function AppShell() {
         <span className="flex-1">{label}</span>
         {count > 0 && (
           <span
-            className={`rounded-full px-[7px] py-[2px] font-sans text-[10px] font-semibold ${
+            className={`rounded-full px-[7px] py-[2px] font-sans text-[11px] font-semibold ${
               active ? "bg-bo-gold-soft text-bo-ink" : "bg-bo-gold-tint text-bo-gold"
             }`}
             aria-label={`${count} due`}
@@ -223,8 +223,8 @@ export function AppShell() {
 
   const sidebar = (
     <aside className="flex h-full w-56 shrink-0 flex-col overflow-y-auto border-r border-bo-sidebar-border bg-bo-surface py-[22px]">
-      <p className="m-0 mb-6 px-6 font-serif text-[19px] font-semibold text-bo-ink">
-        iGroom <span className="font-sans text-[11px] font-medium text-bo-muted-5">Backoffice</span>
+      <p className="m-0 mb-6 px-6 font-sans text-[18px] font-semibold text-bo-ink">
+        iGroom <span className="font-sans text-[12px] font-medium text-bo-muted-5">Backoffice</span>
       </p>
 
       <nav className="flex flex-col gap-0.5">
@@ -232,7 +232,7 @@ export function AppShell() {
         {sales.length > 0 && (
           <>
             <p
-              className={`m-0 mb-1.5 px-6 font-sans text-[10px] font-semibold tracking-[0.1em] text-bo-muted-5 ${firstPlain.length ? "mt-3" : "mt-1"}`}
+              className={`m-0 mb-1.5 px-6 font-sans text-[11px] font-semibold tracking-[0.1em] text-bo-muted-5 ${firstPlain.length ? "mt-3" : "mt-1"}`}
             >
               SALES
             </p>
@@ -259,7 +259,7 @@ export function AppShell() {
               {displayName}
             </p>
             {subtitle && (
-              <p className="m-0 truncate font-sans text-[11px] text-bo-muted-5">{subtitle}</p>
+              <p className="m-0 truncate font-sans text-[12px] text-bo-muted-5">{subtitle}</p>
             )}
           </div>
         </NavLink>
@@ -310,7 +310,7 @@ export function AppShell() {
             <span className="h-0.5 w-4 rounded bg-bo-ink-soft" />
             <span className="h-0.5 w-4 rounded bg-bo-ink-soft" />
           </button>
-          <p className="m-0 font-serif text-[17px] font-semibold text-bo-ink">iGroom</p>
+          <p className="m-0 font-sans text-[18px] font-semibold text-bo-ink">iGroom</p>
           <span className="w-9" />
         </header>
 
@@ -358,12 +358,12 @@ export function AppShell() {
                     aria-hidden
                   />
                   <span
-                    className={`font-sans text-[11px] ${active ? "font-semibold" : "font-medium"}`}
+                    className={`font-sans text-[12px] ${active ? "font-semibold" : "font-medium"}`}
                   >
                     {tab.label}
                   </span>
                   {count > 0 && (
-                    <span className="absolute -top-1 left-1/2 ml-2 rounded-full bg-bo-gold-soft px-1.5 font-sans text-[10px] font-semibold text-bo-ink">
+                    <span className="absolute -top-1 left-1/2 ml-2 rounded-full bg-bo-gold-soft px-1.5 font-sans text-[11px] font-semibold text-bo-ink">
                       {count}
                     </span>
                   )}

@@ -44,7 +44,7 @@ export function DashboardPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="m-0 font-sans text-2xl font-semibold text-bo-ink">Overview</h1>
-        <span className="inline-flex items-center gap-2 rounded-[10px] border border-bo-input-border bg-bo-surface px-3.5 py-2 font-sans text-[13px] font-medium text-bo-muted-1">
+        <span className="inline-flex items-center gap-2 rounded-[10px] border border-bo-input-border bg-bo-surface px-3.5 py-2 font-sans text-[14px] font-medium text-bo-muted-1">
           Aug 07 2026 → Aug 13 2026
         </span>
       </div>
@@ -79,20 +79,20 @@ export function DashboardPage() {
 
       <div className="mb-6 grid grid-cols-2 gap-4">
         <div className="rounded-[14px] border border-bo-border bg-bo-surface p-5">
-          <p className="m-0 mb-1 font-sans text-[15px] font-semibold text-bo-ink">
+          <p className="m-0 mb-1 font-sans text-[16px] font-semibold text-bo-ink">
             Revenue breakdown
           </p>
           <div className="my-3 mb-4 flex gap-7">
             <div>
-              <span className="font-sans text-[11px] text-bo-muted-4">Total Revenue</span>
+              <span className="font-sans text-[12px] text-bo-muted-4">Total Revenue</span>
               <p className="m-0 mt-0.5 font-sans text-lg font-bold text-bo-ink">$68,240</p>
             </div>
             <div>
-              <span className="font-sans text-[11px] text-bo-muted-4">New Subscriptions</span>
+              <span className="font-sans text-[12px] text-bo-muted-4">New Subscriptions</span>
               <p className="m-0 mt-0.5 font-sans text-lg font-bold text-bo-ink">$4,120</p>
             </div>
             <div>
-              <span className="font-sans text-[11px] text-bo-muted-4">Recurring</span>
+              <span className="font-sans text-[12px] text-bo-muted-4">Recurring</span>
               <p className="m-0 mt-0.5 font-sans text-lg font-bold text-bo-ink">$64,120</p>
             </div>
           </div>
@@ -108,16 +108,16 @@ export function DashboardPage() {
         </div>
 
         <div className="rounded-[14px] border border-bo-border bg-bo-surface p-5">
-          <p className="m-0 mb-1 font-sans text-[15px] font-semibold text-bo-ink">
+          <p className="m-0 mb-1 font-sans text-[16px] font-semibold text-bo-ink">
             Bookings vs walk-ins
           </p>
           <div className="my-3 mb-4 flex gap-7">
             <div>
-              <span className="font-sans text-[11px] text-bo-muted-4">Booked</span>
+              <span className="font-sans text-[12px] text-bo-muted-4">Booked</span>
               <p className="m-0 mt-0.5 font-sans text-lg font-bold text-bo-ink">3,609</p>
             </div>
             <div>
-              <span className="font-sans text-[11px] text-bo-muted-4">Walk-in QR</span>
+              <span className="font-sans text-[12px] text-bo-muted-4">Walk-in QR</span>
               <p className="m-0 mt-0.5 font-sans text-lg font-bold text-bo-ink">1,203</p>
             </div>
           </div>
@@ -139,11 +139,11 @@ export function DashboardPage() {
 
       <div className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface">
         <div className="flex items-center justify-between border-b border-bo-sidebar-border px-5 py-4">
-          <p className="m-0 font-sans text-[15px] font-semibold text-bo-ink">
+          <p className="m-0 font-sans text-[16px] font-semibold text-bo-ink">
             Top shops by revenue
           </p>
         </div>
-        <div className="grid grid-cols-[1.6fr_1fr_0.9fr_0.9fr_0.9fr] bg-bo-table-head px-5 py-2.5 font-sans text-[11px] font-semibold text-bo-muted-4">
+        <div className="grid grid-cols-[1.6fr_1fr_0.9fr_0.9fr_0.9fr] bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4">
           <span>Shop</span>
           <span>Plan</span>
           <span>Seats</span>
@@ -169,10 +169,10 @@ export function DashboardPage() {
                 i < topShops.length - 1 ? "border-b border-bo-border-soft" : ""
               }`}
             >
-              <span className="font-sans text-[13px] font-semibold text-bo-ink">{shop.name}</span>
+              <span className="font-sans text-[14px] font-semibold text-bo-ink">{shop.name}</span>
               <span className="font-sans text-xs font-medium text-bo-muted-2">{shop.planName}</span>
               <span className="font-sans text-xs font-medium text-bo-muted-2">{shop.seats}</span>
-              <span className="font-sans text-[13px] font-semibold text-bo-ink-soft">
+              <span className="font-sans text-[14px] font-semibold text-bo-ink-soft">
                 {formatCents(shop.mrrCents, shop.currency)}
               </span>
               <StatusPill tone={SHOP_STATUS_TONE[shop.status]}>

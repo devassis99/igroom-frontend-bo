@@ -93,7 +93,7 @@ export function SalesMapPage() {
               setSelectedId(null);
               setSearchParams({ city: e.target.value });
             }}
-            className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3 py-[7px] font-sans text-[13px] font-medium text-bo-ink-soft"
+            className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3 py-[7px] font-sans text-[14px] font-medium text-bo-ink-soft"
             aria-label="City"
           >
             {cities.map((c) => (
@@ -143,7 +143,7 @@ export function SalesMapPage() {
                 selected && (
                   <div className="flex flex-col gap-1.5 rounded-xl bg-bo-surface px-3.5 py-3 shadow-[0_12px_30px_-10px_rgba(20,15,5,0.35)]">
                     <div className="flex items-start justify-between gap-2">
-                      <span className="font-sans text-[13px] font-semibold text-bo-ink">
+                      <span className="font-sans text-[14px] font-semibold text-bo-ink">
                         {selected.name}
                       </span>
                       <StatusBadge
@@ -152,7 +152,7 @@ export function SalesMapPage() {
                         size="sm"
                       />
                     </div>
-                    <span className="font-sans text-[11px] text-bo-muted-3">
+                    <span className="font-sans text-[12px] text-bo-muted-3">
                       {[
                         selected.address?.split(",")[0],
                         chairsLabel(selected.chairs),
@@ -163,8 +163,8 @@ export function SalesMapPage() {
                         (selected.kind === "shop" ? "On iGroom — not from a lead" : "")}
                     </span>
                     {selected.nextFollowUpAt && (
-                      <span className="font-sans text-[11px]">
-                        <DueText at={selected.nextFollowUpAt} className="text-[11px]" />{" "}
+                      <span className="font-sans text-[12px]">
+                        <DueText at={selected.nextFollowUpAt} className="text-[12px]" />{" "}
                         <span className="text-bo-muted-3">{selected.nextFollowUpNote ?? ""}</span>
                       </span>
                     )}
@@ -188,12 +188,12 @@ export function SalesMapPage() {
           <div className="flex min-h-0 flex-col gap-3.5 overflow-y-auto">
             <Card className="flex flex-col gap-3 p-5">
               <div className="flex items-center justify-between">
-                <p className="m-0 font-sans text-[15px] font-semibold text-bo-ink">
+                <p className="m-0 font-sans text-[16px] font-semibold text-bo-ink">
                   {data.density.cityName} density
                 </p>
                 <ExplorePill on={data.density.exploreOn} />
               </div>
-              <p className="m-0 font-sans text-[34px] font-bold text-bo-ink">
+              <p className="m-0 font-sans text-[30px] font-bold text-bo-ink">
                 {data.density.liveShops}{" "}
                 <span className="text-sm font-normal text-bo-muted-4">
                   / {data.density.unlockAt} live shops
@@ -222,11 +222,11 @@ export function SalesMapPage() {
                   className="flex items-start justify-between gap-2.5"
                 >
                   <div className="min-w-0">
-                    <p className="m-0 truncate font-sans text-[13px] font-semibold text-bo-ink hover:underline">
+                    <p className="m-0 truncate font-sans text-[14px] font-semibold text-bo-ink hover:underline">
                       {c.shopName}
                     </p>
                     <p
-                      className={`m-0 font-sans text-[11px] ${c.stuck ? "text-bo-red" : "text-bo-muted-4"}`}
+                      className={`m-0 font-sans text-[12px] ${c.stuck ? "text-bo-red" : "text-bo-muted-4"}`}
                     >
                       {c.line}
                     </p>
@@ -255,7 +255,7 @@ export function SalesMapPage() {
                         {c.name}
                       </span>
                       <span
-                        className={`font-sans text-[11px] font-medium ${!c.hasRep ? "text-bo-red" : c.exploreOn ? "text-bo-success" : "text-bo-muted-4"}`}
+                        className={`font-sans text-[12px] font-medium ${!c.hasRep ? "text-bo-red" : c.exploreOn ? "text-bo-success" : "text-bo-muted-4"}`}
                       >
                         {c.liveShops} / {c.unlockAt}
                         {!c.hasRep ? " · No rep" : c.exploreOn ? " · Explore on" : ""}

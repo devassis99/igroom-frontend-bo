@@ -70,7 +70,7 @@ function Steps({ status }: { status: LeadStatus }) {
             }`}
           />
           <span
-            className={`font-sans text-[11px] whitespace-nowrap sm:truncate ${i === index ? "" : "hidden sm:block"} ${i === index ? "font-semibold text-bo-ink-soft" : i < index ? "font-medium text-bo-ink-soft" : "font-medium text-bo-muted-6"}`}
+            className={`font-sans text-[12px] whitespace-nowrap sm:truncate ${i === index ? "" : "hidden sm:block"} ${i === index ? "font-semibold text-bo-ink-soft" : i < index ? "font-medium text-bo-ink-soft" : "font-medium text-bo-muted-6"}`}
           >
             {STATUS_LABEL[s]}
           </span>
@@ -83,7 +83,7 @@ function Steps({ status }: { status: LeadStatus }) {
 function Timeline({ entries }: { entries: TimelineEntry[] }) {
   return (
     <Card className="px-5 py-4.5">
-      <p className="m-0 mb-3.5 font-sans text-[15px] font-semibold text-bo-ink">Timeline</p>
+      <p className="m-0 mb-3.5 font-sans text-[16px] font-semibold text-bo-ink">Timeline</p>
       {entries.map((t, i) => (
         <div key={t.id} className="grid grid-cols-[22px_minmax(0,1fr)] gap-3">
           <div className="flex flex-col items-center">
@@ -94,21 +94,21 @@ function Timeline({ entries }: { entries: TimelineEntry[] }) {
           </div>
           <div className="pb-3.5">
             <div className="mb-0.5 flex flex-wrap items-center gap-2">
-              <span className="font-sans text-[13px] font-semibold text-bo-ink">
+              <span className="font-sans text-[14px] font-semibold text-bo-ink">
                 {t.summary ?? t.type}
               </span>
               {t.upcoming && (
-                <span className="rounded-md bg-bo-gold-tint px-[7px] py-[2px] font-sans text-[10px] font-semibold text-bo-gold">
+                <span className="rounded-md bg-bo-gold-tint px-[7px] py-[2px] font-sans text-[11px] font-semibold text-bo-gold">
                   Upcoming
                 </span>
               )}
             </div>
-            <p className="m-0 mb-1 font-sans text-[11px] text-bo-muted-4">
+            <p className="m-0 mb-1 font-sans text-[12px] text-bo-muted-4">
               {dayAndTime(t.scheduledAt ?? t.occurredAt)}
               {t.by ? ` · ${t.by.shortName}` : " · iGroom"}
             </p>
             {t.body && (
-              <p className="m-0 font-sans text-[13px] leading-[1.45] whitespace-pre-line text-bo-muted-1">
+              <p className="m-0 font-sans text-[14px] leading-[1.45] whitespace-pre-line text-bo-muted-1">
                 {t.body}
               </p>
             )}
@@ -288,7 +288,7 @@ function ReassignModal({
       <h2 className="m-0 font-sans text-xl font-semibold text-bo-ink">
         {isManager ? "Assign lead" : "Request reassignment"}
       </h2>
-      <p className="m-0 font-sans text-[13px] text-bo-muted-2">
+      <p className="m-0 font-sans text-[14px] text-bo-muted-2">
         {isManager
           ? "Moves the lead and restarts its ownership lock. The new owner sees it under New for you."
           : "A manager approves moves between reps. Commission follows whoever converts the shop."}
@@ -379,11 +379,11 @@ function InviteRow({ invite }: { invite: InviteSummary }) {
           {invite.mode === "payment_link" ? "Payment link" : "Signup invite"}
           {terms ? ` · ${terms}` : ""}
         </span>
-        <span className="font-sans text-[11px] font-semibold text-bo-muted-3">
+        <span className="font-sans text-[12px] font-semibold text-bo-muted-3">
           {label[invite.status]}
         </span>
       </div>
-      <span className="font-sans text-[11px] text-bo-muted-4">
+      <span className="font-sans text-[12px] text-bo-muted-4">
         {invite.sentAt
           ? `Sent ${shortDate(invite.sentAt)}`
           : `Created ${shortDate(invite.createdAt)}`}
@@ -392,7 +392,7 @@ function InviteRow({ invite }: { invite: InviteSummary }) {
       </span>
       {linkNote && (
         <span
-          className={`font-sans text-[11px] ${invite.linkState === "live" ? "text-bo-muted-4" : "font-semibold text-bo-red"}`}
+          className={`font-sans text-[12px] ${invite.linkState === "live" ? "text-bo-muted-4" : "font-semibold text-bo-red"}`}
         >
           {linkNote}
         </span>
@@ -528,7 +528,7 @@ export function SalesLeadPage() {
             <h1 className="m-0 font-sans text-2xl font-semibold text-bo-ink">{lead.shopName}</h1>
             <StatusBadge status={lead.status} label={lead.statusLabel} />
             {lead.needsPhone && (
-              <span className="rounded-full bg-bo-danger-bg px-2 py-0.5 font-sans text-[11px] font-semibold text-bo-red">
+              <span className="rounded-full bg-bo-danger-bg px-2 py-0.5 font-sans text-[12px] font-semibold text-bo-red">
                 No phone
               </span>
             )}
@@ -564,7 +564,7 @@ export function SalesLeadPage() {
             <select
               value=""
               onChange={(e) => e.target.value && changeStatus.mutate(e.target.value as LeadStatus)}
-              className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3 py-2 font-sans text-[13px] font-medium text-bo-ink-soft"
+              className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3 py-2 font-sans text-[14px] font-medium text-bo-ink-soft"
               aria-label="Change status"
               disabled={changeStatus.isPending}
             >
@@ -595,7 +595,7 @@ export function SalesLeadPage() {
       <Steps status={lead.status} />
 
       {closed && (
-        <div className="rounded-xl border border-bo-border bg-bo-well px-4 py-3 font-sans text-[13px] text-bo-ink-soft">
+        <div className="rounded-xl border border-bo-border bg-bo-well px-4 py-3 font-sans text-[14px] text-bo-ink-soft">
           {lead.status === "lost" ? (
             <>
               <b className="font-semibold">Lost · {lead.closedReason}</b>
@@ -614,14 +614,14 @@ export function SalesLeadPage() {
         </div>
       )}
       {detail.pendingReassignment && (
-        <div className="rounded-xl border border-[oklch(72%_0.09_85/0.6)] bg-bo-gold-bg px-4 py-3 font-sans text-[13px] text-bo-ink-soft">
+        <div className="rounded-xl border border-[oklch(72%_0.09_85/0.6)] bg-bo-gold-bg px-4 py-3 font-sans text-[14px] text-bo-ink-soft">
           Reassignment to {detail.pendingReassignment.toRepName ?? "another rep"} is waiting for a
           manager
           {detail.pendingReassignment.reason ? ` — “${detail.pendingReassignment.reason}”` : ""}.
         </div>
       )}
       {lead.territoryClaimUntil && new Date(lead.territoryClaimUntil) > new Date() && (
-        <div className="rounded-xl border border-bo-border bg-bo-well px-4 py-3 font-sans text-[13px] text-bo-ink-soft">
+        <div className="rounded-xl border border-bo-border bg-bo-well px-4 py-3 font-sans text-[14px] text-bo-ink-soft">
           Added in {lead.territory?.name ?? "another rep's territory"}. Its owner can claim it until{" "}
           {dayAndTime(lead.territoryClaimUntil)}.
         </div>
@@ -660,7 +660,7 @@ export function SalesLeadPage() {
               {detail.setup.checklist.map((c) => (
                 <div key={c.step} className="flex items-center gap-2.5">
                   <span
-                    className={`flex h-4.5 w-4.5 items-center justify-center rounded-full font-sans text-[10px] font-bold ${
+                    className={`flex h-4.5 w-4.5 items-center justify-center rounded-full font-sans text-[11px] font-bold ${
                       c.done
                         ? "bg-bo-success text-bo-on-dark"
                         : c.current
@@ -671,12 +671,12 @@ export function SalesLeadPage() {
                     {c.done ? "✓" : ""}
                   </span>
                   <span
-                    className={`font-sans text-[13px] capitalize ${c.current ? "font-semibold text-bo-ink" : "text-bo-muted-2"}`}
+                    className={`font-sans text-[14px] capitalize ${c.current ? "font-semibold text-bo-ink" : "text-bo-muted-2"}`}
                   >
                     {c.label}
                   </span>
                   {c.current && lead.setupStepSince && (
-                    <span className="ml-auto font-sans text-[11px] text-bo-muted-4">
+                    <span className="ml-auto font-sans text-[12px] text-bo-muted-4">
                       {sinceLabel(lead.setupStepSince)}
                     </span>
                   )}
@@ -712,10 +712,10 @@ export function SalesLeadPage() {
             <div className="flex items-center gap-2.5">
               <RepAvatar rep={lead.rep} size={30} />
               <div>
-                <p className="m-0 font-sans text-[13px] font-semibold text-bo-ink">
+                <p className="m-0 font-sans text-[14px] font-semibold text-bo-ink">
                   {lead.rep?.name ?? "Unassigned pool"}
                 </p>
-                <p className="m-0 font-sans text-[11px] text-bo-muted-4">
+                <p className="m-0 font-sans text-[12px] text-bo-muted-4">
                   {lead.rep
                     ? lead.rep.type === "agent"
                       ? "Commission agent"

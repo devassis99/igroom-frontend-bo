@@ -9,9 +9,9 @@ import { accountApi } from "@/lib/account-api";
 import { ApiError } from "@/lib/http";
 
 const modalCancelButtonClass =
-  "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[13px] font-semibold text-bo-ink-soft";
+  "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 const modalSubmitButtonClass =
-  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[13px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 
 function errorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiError) return error.message;
@@ -61,7 +61,12 @@ function ResetMfaModal({
         <h1 className="m-0 font-sans text-xl font-semibold text-bo-ink">
           {mfaEnabled ? "Reset Two-Factor Authentication" : "Finish Two-Factor Setup"}
         </h1>
-        <button type="button" onClick={handleClose} aria-label="Close" className="font-sans text-xl text-bo-muted-5">
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Close"
+          className="font-sans text-xl text-bo-muted-5"
+        >
           ×
         </button>
       </div>
@@ -69,8 +74,8 @@ function ResetMfaModal({
       {mfaEnabled ? (
         <>
           <p className="-mt-2.5 m-0 font-sans text-xs leading-relaxed text-bo-muted-5">
-            Enter the current code from your authenticator app to confirm it's you, then you'll
-            scan a new QR code to finish resetting it — useful if you got a new phone.
+            Enter the current code from your authenticator app to confirm it's you, then you'll scan
+            a new QR code to finish resetting it — useful if you got a new phone.
           </p>
           <OtpInput value={code} onChange={setCode} disabled={reset.isPending} />
         </>
@@ -123,11 +128,15 @@ export function AccountPage() {
       <div className="flex max-w-[560px] flex-col gap-5 rounded-[14px] border border-bo-border bg-bo-surface p-6">
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="font-sans text-xs font-medium tracking-[0.02em] text-bo-muted-1">EMAIL</span>
+            <span className="font-sans text-xs font-medium tracking-[0.02em] text-bo-muted-1">
+              EMAIL
+            </span>
             <span className="font-sans text-sm font-medium text-bo-ink">{user?.email}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="font-sans text-xs font-medium tracking-[0.02em] text-bo-muted-1">ROLE</span>
+            <span className="font-sans text-xs font-medium tracking-[0.02em] text-bo-muted-1">
+              ROLE
+            </span>
             <span className="font-sans text-sm font-medium text-bo-ink">{role?.name ?? "—"}</span>
           </div>
         </div>
@@ -156,7 +165,11 @@ export function AccountPage() {
         </div>
       </div>
 
-      <ResetMfaModal open={resetOpen} onClose={() => setResetOpen(false)} mfaEnabled={user?.mfaEnabled ?? false} />
+      <ResetMfaModal
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        mfaEnabled={user?.mfaEnabled ?? false}
+      />
     </div>
   );
 }
