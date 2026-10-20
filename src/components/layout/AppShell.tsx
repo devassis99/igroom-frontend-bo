@@ -1,14 +1,22 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  Navigate,
+  NavLink,
+  Outlet,
+  ScrollRestoration,
+  useLocation,
+  useNavigate,
+  useNavigation,
+} from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { authApi } from "@/auth/auth-api";
 import { useAuthStore } from "@/auth/auth-store";
 import { salesApi } from "@/lib/sales-api";
 import { LogoMark, Wordmark } from "@/components/brand/Logo";
+import { AccountMenu } from "@/components/layout/AccountMenu";
 import {
   BillingIcon,
   BookingsIcon,
-  LogOutIcon,
   MapIcon,
   MeIcon,
   type NavIconComponent,
@@ -24,7 +32,6 @@ import {
   SupportIcon,
   TodayIcon,
   UsageIcon,
-  UsersIcon,
 } from "@/components/layout/NavIcons";
 
 interface NavItem {
@@ -35,14 +42,18 @@ interface NavItem {
    * bo_permissions key(s) gating this tab — hides it from the sidebar and
    * blocks direct navigation into it (see accessAllowed below). An array
    * means any one of them will do: Sales is open to a rep (sales.work)
-   * and to a sales manager (sales.manage) alike.
+   * and to a sales manager (sales.manage) alike. Null means every
+   * signed-in user — Settings, whose My Account section is everyone's
+   * (its other sections check their own permissions; see SettingsLayout).
    */
-  permission: string | string[];
+  permission: string | string[] | null;
   /** Other paths that belong to this tab, for highlighting and the gate — a lead's own page is part of Pipeline. */
   also?: string[];
   group?: "sales";
   /** Shown instead of `label` to someone who works leads but doesn't manage the team. */
   repLabel?: string;
+  /** Sits at the foot of the sidebar, just above your name, rather than in the list — Settings, as in the tenant app. */
+  bottom?: boolean;
 }
 
 const SALES_ANY = ["sales.work", "sales.manage"];
@@ -100,8 +111,9 @@ const NAV_ITEMS: NavItem[] = [
     icon: ReferralsIcon,
     permission: "referrals.view",
   },
-  { to: "/users", label: "User Management", icon: UsersIcon, permission: "users.view" },
-  { to: "/settings", label: "Platform Settings", icon: SettingsIcon, permission: "settings.view" },
+  // Platform Settings, User Management and My Account live inside here,
+  // behind the Settings sidebar — like the tenant app's Settings.
+  { to: "/settings", label: "Settings", icon: SettingsIcon, permission: null, bottom: true },
 ];
 
 /** The phone's bottom tab bar for Sales (B9l): Today · Leads · Map · Me. */
@@ -189,9 +201,37 @@ export function AppShell() {
   const permissions = useAuthStore((s) => s.permissions);
   const navigate = useNavigate();
   const location = useLocation();
+  // "loading" while a page's code is still downloading after a menu click
+  // (every page is its own lazy chunk — see routes/router.tsx).
+  const navigating = useNavigation().state === "loading";
   const [drawerOpen, setDrawerOpen] = useState(false);
   // Desktop only: the phone drawer always opens full width.
   const [collapsed, setCollapsed] = useState(readCollapsed);
+
+  // Settings brings its own sidebar, and two full sidebars side by side
+  // squeeze the page — so inside /settings the main one narrows to its
+  // icon strip, as in the tenant app. Route-driven and temporary: it never
+  // touches the saved preference above, the toggle still opens it while
+  // you're there, and leaving Settings forgets that.
+  const isSettingsRoute =
+    location.pathname === "/settings" || location.pathname.startsWith("/settings/");
+  const [expandedInSettings, setExpandedInSettings] = useState(false);
+  const [wasSettingsRoute, setWasSettingsRoute] = useState(isSettingsRoute);
+  if (wasSettingsRoute !== isSettingsRoute) {
+    setWasSettingsRoute(isSettingsRoute);
+    if (!isSettingsRoute) setExpandedInSettings(false);
+  }
+  const railCollapsed = isSettingsRoute ? !expandedInSettings : collapsed;
+  function toggleCollapsed() {
+    if (isSettingsRoute) setExpandedInSettings((v) => !v);
+    else setCollapsed((v) => !v);
+  }
+
+  // The account menu, opened from the name at the bottom of the sidebar —
+  // on desktop, or inside the phone's drawer (two triggers, one menu).
+  const [accountMenuFrom, setAccountMenuFrom] = useState<"sidebar" | "drawer" | null>(null);
+  const sidebarAccountRef = useRef<HTMLButtonElement>(null);
+  const drawerAccountRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     try {
@@ -201,8 +241,9 @@ export function AppShell() {
     }
   }, [collapsed]);
 
-  const allowed = (p: string | string[]) =>
-    Array.isArray(p) ? p.some((k) => permissions.includes(k)) : permissions.includes(p);
+  const allowed = (p: string | string[] | null) =>
+    p === null ||
+    (Array.isArray(p) ? p.some((k) => permissions.includes(k)) : permissions.includes(p));
   const hasSales = allowed(SALES_ANY);
   const salesManager = permissions.includes("sales.manage");
 
@@ -224,7 +265,8 @@ export function AppShell() {
   useEffect(() => setDrawerOpen(false), [location.pathname]);
 
   const visibleNavItems = NAV_ITEMS.filter((item) => allowed(item.permission));
-  const plain = visibleNavItems.filter((i) => !i.group);
+  const bottomItems = visibleNavItems.filter((i) => i.bottom);
+  const plain = visibleNavItems.filter((i) => !i.group && !i.bottom);
   const firstPlain = plain.filter(
     (i) => NAV_ITEMS.indexOf(i) < NAV_ITEMS.findIndex((n) => n.group === "sales"),
   );
@@ -232,6 +274,9 @@ export function AppShell() {
   const sales = visibleNavItems.filter((i) => i.group === "sales");
 
   const currentNavItem = NAV_ITEMS.find((item) => matchesNavItem(location.pathname, item));
+  // Settings animates its own sections (SettingsLayout), so moving between
+  // them keeps its sidebar in place instead of replaying the whole area.
+  const routeKey = isSettingsRoute ? "/settings" : location.pathname;
   const accessAllowed = !currentNavItem || allowed(currentNavItem.permission);
 
   const rep = salesMe.data?.me.rep;
@@ -310,7 +355,7 @@ export function AppShell() {
         {!inDrawer && (
           <button
             type="button"
-            onClick={() => setCollapsed((v) => !v)}
+            onClick={toggleCollapsed}
             title={rail ? "Expand sidebar" : "Collapse sidebar"}
             aria-label={rail ? "Expand sidebar" : "Collapse sidebar"}
             className="group relative flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md border-none bg-transparent text-bo-muted-5 transition-colors duration-150 hover:bg-bo-page hover:text-bo-ink"
@@ -360,38 +405,54 @@ export function AppShell() {
 
       <div className="min-h-6 flex-1" />
 
-      <div className="flex flex-col gap-2 px-6">
-        <NavLink
-          to="/account"
-          className="flex items-center gap-2.5"
-          title={
-            rail
-              ? `${displayName ?? "Account"}: account & two-factor settings`
-              : "Account & two-factor settings"
+      {/* Settings at the foot, right above your name — the tenant app's layout. */}
+      {bottomItems.length > 0 && (
+        <nav aria-label="Settings and account" className="mb-2 flex flex-col gap-0.5">
+          {bottomItems.map((item) => renderItem(item, rail))}
+        </nav>
+      )}
+
+      <div className="px-3.5">
+        <button
+          ref={inDrawer ? drawerAccountRef : sidebarAccountRef}
+          type="button"
+          onClick={() =>
+            setAccountMenuFrom((from) => (from === null ? (inDrawer ? "drawer" : "sidebar") : null))
           }
+          aria-haspopup="menu"
+          aria-expanded={accountMenuFrom === (inDrawer ? "drawer" : "sidebar")}
+          title={rail ? `${displayName ?? "Account"} — account menu` : undefined}
+          className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-colors duration-150 hover:bg-bo-page"
         >
           <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-bo-dark font-sans text-xs font-semibold text-bo-on-dark">
             {displayName?.[0]?.toUpperCase() ?? "?"}
           </div>
-          <CollapsibleLabel collapsed={rail} className="min-w-0">
-            <p className="m-0 truncate font-sans text-xs font-semibold text-bo-ink-soft hover:underline">
-              {displayName}
-            </p>
-            {subtitle && (
-              <p className="m-0 truncate font-sans text-[12px] text-bo-muted-5">{subtitle}</p>
-            )}
+          <CollapsibleLabel collapsed={rail} className="flex min-w-0 flex-1 items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="m-0 truncate font-sans text-xs font-semibold text-bo-ink-soft">
+                {displayName}
+              </p>
+              {subtitle && (
+                <p className="m-0 truncate font-sans text-[12px] text-bo-muted-5">{subtitle}</p>
+              )}
+            </div>
+            {/* Up and down chevrons: this opens a menu. */}
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className="shrink-0 text-bo-muted-5"
+            >
+              <polyline points="7 15 12 20 17 15" />
+              <polyline points="7 9 12 4 17 9" />
+            </svg>
           </CollapsibleLabel>
-        </NavLink>
-        <button
-          type="button"
-          onClick={handleLogout}
-          title={rail ? "Log out" : undefined}
-          className="flex items-center gap-2.5 text-left font-sans text-xs text-bo-muted-5 hover:text-bo-ink"
-        >
-          <span className="flex w-[30px] shrink-0 justify-center">
-            <LogOutIcon className="h-4 w-4" />
-          </span>
-          <CollapsibleLabel collapsed={rail}>Log out</CollapsibleLabel>
         </button>
       </div>
     </aside>
@@ -399,7 +460,12 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-dvh bg-bo-page">
-      <div className="sticky top-0 hidden h-dvh md:block">{renderSidebar(collapsed, false)}</div>
+      {/* A thin gold line while a page is still loading after a click — shown
+          only after a short delay, so a fast load never flashes it. */}
+      {navigating && <div aria-hidden className="bo-nav-progress" />}
+      <div className="sticky top-0 hidden h-dvh md:block">
+        {renderSidebar(railCollapsed, false)}
+      </div>
 
       {drawerOpen && (
         <div
@@ -440,27 +506,55 @@ export function AppShell() {
         <main
           className={`flex-1 overflow-x-hidden px-4 py-5 md:px-9 md:py-7 ${hasSales ? "pb-28 md:pb-7" : ""}`}
         >
-          {accessAllowed ? (
-            <Outlet />
-          ) : location.pathname === "/" && visibleNavItems[0] ? (
-            // Landing on "/" without Overview (a sales rep, say) goes to
-            // the first tab they do have, rather than a wall.
-            <Navigate to={visibleNavItems[0].to} replace />
-          ) : (
-            <div className="flex flex-col items-start gap-2 rounded-[14px] border border-bo-border bg-bo-surface p-8">
-              <h1 className="m-0 font-sans text-xl font-semibold text-bo-ink">Access denied</h1>
-              <p className="m-0 font-sans text-sm text-bo-muted-5">
-                Your role doesn't have permission to view this page. Ask an admin to grant{" "}
-                <code className="font-mono text-xs text-bo-muted-3">
-                  {Array.isArray(currentNavItem?.permission)
-                    ? currentNavItem.permission.join(" or ")
-                    : currentNavItem?.permission}
-                </code>{" "}
-                if you believe this is a mistake.
-              </p>
-            </div>
-          )}
+          {/* Keyed by pathname, so every menu click remounts this and the
+              new page fades and rises in (bo-route-in, index.css) instead
+              of swapping in place — the same as the tenant app's AppShell. */}
+          <div key={routeKey} className="bo-route-in">
+            {accessAllowed ? (
+              <Outlet />
+            ) : location.pathname === "/" && visibleNavItems[0] ? (
+              // Landing on "/" without Overview (a sales rep, say) goes to
+              // the first tab they do have, rather than a wall.
+              <Navigate to={visibleNavItems[0].to} replace />
+            ) : (
+              <div className="flex flex-col items-start gap-2 rounded-[14px] border border-bo-border bg-bo-surface p-8">
+                <h1 className="m-0 font-sans text-xl font-semibold text-bo-ink">Access denied</h1>
+                <p className="m-0 font-sans text-sm text-bo-muted-5">
+                  Your role doesn't have permission to view this page. Ask an admin to grant{" "}
+                  <code className="font-mono text-xs text-bo-muted-3">
+                    {Array.isArray(currentNavItem?.permission)
+                      ? currentNavItem.permission.join(" or ")
+                      : currentNavItem?.permission}
+                  </code>{" "}
+                  if you believe this is a mistake.
+                </p>
+              </div>
+            )}
+          </div>
         </main>
+        {/* A new page opens at the top rather than wherever the last one
+            was scrolled to; Back and Forward still return to where you were. */}
+        <ScrollRestoration />
+        <AccountMenu
+          open={accountMenuFrom !== null}
+          onClose={() => setAccountMenuFrom(null)}
+          anchorRef={accountMenuFrom === "drawer" ? drawerAccountRef : sidebarAccountRef}
+          name={displayName ?? "Account"}
+          email={user?.email}
+          subtitle={subtitle}
+          onMyAccount={() => {
+            setAccountMenuFrom(null);
+            navigate("/settings/account");
+          }}
+          onSettings={() => {
+            setAccountMenuFrom(null);
+            navigate("/settings");
+          }}
+          onLogOut={() => {
+            setAccountMenuFrom(null);
+            void handleLogout();
+          }}
+        />
 
         {hasSales && (
           <nav

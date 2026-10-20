@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/components/ui/Modal";
+import { Select, type SelectOption } from "@/components/ui/Select";
 import {
   duplicatesFrom,
   salesApi,
@@ -71,6 +72,8 @@ export function NewLeadModal({
   const [duplicates, setDuplicates] = useState<DuplicateMatch[]>([]);
   const [allowDuplicate, setAllowDuplicate] = useState(false);
   const [touched, setTouched] = useState(false);
+  const toolFieldId = useId();
+  const assignFieldId = useId();
 
   const territories = useQuery({
     queryKey: ["sales", "territories"],
@@ -133,6 +136,30 @@ export function NewLeadModal({
     [territories.data, postalCode],
   );
   const homeCity = ctx?.cities.find((c) => c.id === myRep?.homeCityId) ?? null;
+
+  const toolOptions = useMemo<SelectOption<string>[]>(
+    () => [
+      { value: "", label: "Not sure yet" },
+      ...(ctx?.vocab.bookingTools ?? []).map((t) => ({ value: t, label: t })),
+    ],
+    [ctx?.vocab.bookingTools],
+  );
+  const assignOptions = useMemo<SelectOption<string>[]>(
+    () => [
+      {
+        value: "route",
+        label: territory
+          ? `${territory.name} owner${territory.ownerShortName ? ` (${territory.ownerShortName})` : ""}`
+          : "Route by territory",
+      },
+      ...(myRep ? [{ value: "me", label: "Me" }] : []),
+      ...(ctx?.reps ?? [])
+        .filter((r) => r.id !== myRep?.id)
+        .map((r) => ({ value: r.id, label: r.name })),
+      { value: "pool", label: "Unassigned pool" },
+    ],
+    [territory, myRep, ctx?.reps],
+  );
 
   /**
    * A manager's "Assign to". "Route by territory" sends the territory's
@@ -331,17 +358,18 @@ export function NewLeadModal({
           <span className={labelClass}>Chairs</span>
           <Stepper value={chairs} onChange={setChairs} min={0} max={60} label="chairs" />
         </div>
-        <label className="flex flex-col gap-1.5">
-          <span className={labelClass}>Current booking tool</span>
-          <select value={tool} onChange={(e) => setTool(e.target.value)} className={inputClass}>
-            <option value="">Not sure yet</option>
-            {(ctx?.vocab.bookingTools ?? []).map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={toolFieldId} className={labelClass}>
+            Current booking tool
+          </label>
+          <Select
+            id={toolFieldId}
+            label="Current booking tool"
+            value={tool}
+            options={toolOptions}
+            onChange={setTool}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -378,29 +406,17 @@ export function NewLeadModal({
 
       <div className="flex flex-col gap-3 border-t border-bo-border-soft pt-3 sm:flex-row sm:items-center sm:justify-between">
         {canManage ? (
-          <label className="flex items-center gap-2 font-sans text-xs text-bo-muted-2">
-            Assign to
-            <select
+          <div className="flex items-center gap-2 font-sans text-xs text-bo-muted-2">
+            <label htmlFor={assignFieldId}>Assign to</label>
+            <Select
+              id={assignFieldId}
+              label="Assign to"
+              size="sm"
               value={assign}
-              onChange={(e) => setAssign(e.target.value)}
-              className="rounded-lg border border-bo-input-border bg-bo-surface px-2 py-1.5 font-sans text-xs"
-            >
-              <option value="route">
-                {territory
-                  ? `${territory.name} owner${territory.ownerShortName ? ` (${territory.ownerShortName})` : ""}`
-                  : "Route by territory"}
-              </option>
-              {myRep && <option value="me">Me</option>}
-              {(ctx?.reps ?? [])
-                .filter((r) => r.id !== myRep?.id)
-                .map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name}
-                  </option>
-                ))}
-              <option value="pool">Unassigned pool</option>
-            </select>
-          </label>
+              options={assignOptions}
+              onChange={setAssign}
+            />
+          </div>
         ) : (
           <span className="font-sans text-xs text-bo-muted-2">{assignmentLine}</span>
         )}

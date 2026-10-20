@@ -98,3 +98,187 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/*
+ * Dropdown panels (components/ui/Select.tsx) grow in from the field and
+ * shrink back into it. Applied inline with the duration there; `-out`
+ * needs `forwards` so the panel stays hidden for the short delay before
+ * it unmounts. Same motion as the tenant app's tn-popover-in/out.
+ */
+@keyframes bo-popover-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes bo-popover-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+}
+
+/*
+ * A list's content being replaced — a paged table showing another page or
+ * another filter. Same two motions, timings and easing as the tenant app
+ * (tn-content-in, tn-view-in-forward/back), so both apps move alike:
+ *
+ * - bo-content-in: a short fade-and-rise for a change with no direction to
+ *   it (a filter, the page size). Something for the eye to follow instead
+ *   of a flicker.
+ * - bo-page-in-forward / -back: the next page comes in from the right, the
+ *   previous one from the left, so you can tell which way you went.
+ *
+ * Replayed by a React `key` change remounting the element. `backwards`,
+ * not `both`: a retained transform would make the element the containing
+ * block for any `position: fixed` inside it.
+ */
+@keyframes bo-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bo-page-in-forward {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bo-page-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.bo-content-in {
+  animation: bo-content-in 220ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.bo-page-in-forward {
+  animation: bo-page-in-forward 260ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.bo-page-in-back {
+  animation: bo-page-in-back 260ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/*
+ * components/ui/AutoHeight.tsx: the box eases to its content's height (20
+ * rows down to 7, say) instead of jumping, and fades while the next
+ * content loads.
+ */
+.bo-auto-height {
+  transition:
+    height 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 150ms ease;
+}
+
+/*
+ * AppShell's page entrance, on every menu click: the same fade-and-rise as
+ * bo-content-in, but moving the wrapper with `top` rather than
+ * `transform`. Any transform on the page wrapper, even mid-animation, makes
+ * it the containing block for `position: fixed` inside it — the phone's
+ * "+ Lead" button on Sales Today and Pipeline would sit at the bottom of
+ * the page instead of the screen for those 220 ms, so it would pop in late.
+ * `top` on a relatively positioned box moves only the box itself.
+ */
+@keyframes bo-route-in {
+  from {
+    opacity: 0;
+    top: 6px;
+  }
+  to {
+    opacity: 1;
+    top: 0;
+  }
+}
+
+.bo-route-in {
+  position: relative;
+  animation: bo-route-in 220ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/*
+ * AppShell's loading line: the top edge of the window while a page's code
+ * downloads after a menu click. Fades in only after 150 ms, so a page that
+ * loads quickly never flashes it; a gold segment sweeps across meanwhile.
+ */
+@keyframes bo-nav-progress-show {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bo-nav-progress-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+.bo-nav-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 70;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  animation: bo-nav-progress-show 120ms ease 150ms forwards;
+}
+
+.bo-nav-progress::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: var(--color-bo-gold);
+  animation: bo-nav-progress-sweep 900ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Motion here only smooths a change; anyone who asked their OS for less of it gets the end state at once. */
+@media (prefers-reduced-motion: reduce) {
+  .bo-content-in,
+  .bo-route-in,
+  .bo-page-in-forward,
+  .bo-page-in-back {
+    animation: none;
+  }
+
+  .bo-auto-height {
+    transition: none;
+  }
+
+  /* Still says "loading", just without the sweep. */
+  .bo-nav-progress::before {
+    width: 100%;
+    animation: none;
+  }
+}

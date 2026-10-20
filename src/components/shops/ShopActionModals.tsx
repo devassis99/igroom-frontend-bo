@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Modal } from "@/components/ui/Modal";
 import { Field, formInputClass } from "@/components/ui/FormField";
+import { Select, type SelectOption } from "@/components/ui/Select";
 import {
   shopsApi,
   formatCents,
@@ -23,6 +24,19 @@ import {
  * just holds one piece of state per action instead of a boolean plus a
  * target.
  */
+const STATUS_OPTIONS: SelectOption<SettableShopStatus>[] = SETTABLE_SHOP_STATUSES.map((status) => ({
+  value: status,
+  label: SHOP_STATUS_LABEL[status],
+}));
+
+const PRICE_TIER_OPTIONS: SelectOption<string>[] = [
+  { value: "", label: "Not set" },
+  { value: "1", label: "$" },
+  { value: "2", label: "$$" },
+  { value: "3", label: "$$$" },
+  { value: "4", label: "$$$$" },
+];
+
 export const modalCancelButtonClass =
   "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 export const modalSubmitButtonClass =
@@ -95,17 +109,13 @@ export function ChangeStatusModal({
       </p>
 
       <Field label="NEW STATUS">
-        <select
+        <Select
+          label="New status"
+          size="lg"
           value={status}
-          onChange={(e) => setStatus(e.target.value as SettableShopStatus)}
-          className={formInputClass}
-        >
-          {SETTABLE_SHOP_STATUSES.map((option) => (
-            <option key={option} value={option}>
-              {SHOP_STATUS_LABEL[option]}
-            </option>
-          ))}
-        </select>
+          options={STATUS_OPTIONS}
+          onChange={setStatus}
+        />
       </Field>
 
       <div className="flex flex-col gap-1.5 rounded-[10px] bg-bo-table-head p-3.5">
@@ -184,6 +194,25 @@ export function ChangePlanModal({
     .flatMap((plan) => plan.prices.map((price) => ({ plan, price })))
     .find((entry) => entry.price.priceId === priceId);
 
+  const planOptions = useMemo<SelectOption<string>[]>(() => {
+    const options = plans.flatMap((plan) =>
+      plan.prices.map((price) => ({
+        value: price.priceId,
+        label: `${plan.name} · ${BILLING_INTERVAL_LABEL[price.billingInterval]} · ${formatCents(price.unitAmountCents, price.currency)}`,
+      })),
+    );
+    // The shop's current price may be archived and therefore absent from
+    // plan-options — keep it selectable so the dropdown doesn't silently
+    // jump to some other plan on open.
+    if (shop && !options.some((o) => o.value === shop.priceId)) {
+      options.unshift({
+        value: shop.priceId,
+        label: `${shop.planName} · ${BILLING_INTERVAL_LABEL[shop.billingInterval]} (current, archived)`,
+      });
+    }
+    return options;
+  }, [plans, shop]);
+
   const unchanged = shop !== null && priceId === shop.priceId;
 
   return (
@@ -208,28 +237,13 @@ export function ChangePlanModal({
       </p>
 
       <Field label="NEW PLAN & CADENCE">
-        <select
+        <Select
+          label="New plan and cadence"
+          size="lg"
           value={priceId}
-          onChange={(e) => setPriceId(e.target.value)}
-          className={formInputClass}
-        >
-          {/* The shop's current price may be archived and therefore absent
-              from plan-options — keep it selectable so the dropdown doesn't
-              silently jump to some other plan on open. */}
-          {shop && !plans.some((p) => p.prices.some((x) => x.priceId === shop.priceId)) && (
-            <option value={shop.priceId}>
-              {shop.planName} · {BILLING_INTERVAL_LABEL[shop.billingInterval]} (current, archived)
-            </option>
-          )}
-          {plans.map((plan) =>
-            plan.prices.map((price) => (
-              <option key={price.priceId} value={price.priceId}>
-                {plan.name} · {BILLING_INTERVAL_LABEL[price.billingInterval]} ·{" "}
-                {formatCents(price.unitAmountCents, price.currency)}
-              </option>
-            )),
-          )}
-        </select>
+          options={planOptions}
+          onChange={setPriceId}
+        />
       </Field>
 
       {selected && (
@@ -427,23 +441,20 @@ export function EditShopModal({
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="PRICE TIER">
-              <select
+              <Select
+                label="Price tier"
+                size="lg"
                 value={form.priceTier}
-                onChange={(e) => update("priceTier", e.target.value)}
-                className={formInputClass}
-              >
-                <option value="">Not set</option>
-                <option value="1">$</option>
-                <option value="2">$$</option>
-                <option value="3">$$$</option>
-                <option value="4">$$$$</option>
-              </select>
+                options={PRICE_TIER_OPTIONS}
+                onChange={(next) => update("priceTier", next)}
+              />
             </Field>
             <label className="flex cursor-pointer items-center gap-2.5 self-end pb-3">
               <input
                 type="checkbox"
                 checked={form.isMarketplaceListed}
                 onChange={(e) => update("isMarketplaceListed", e.target.checked)}
+                className="h-4 w-4 cursor-pointer accent-bo-gold"
               />
               <span className="font-sans text-xs font-medium text-bo-ink-soft">
                 Listed on the marketplace

@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { Modal } from "@/components/ui/Modal";
 import { Field, formInputClass } from "@/components/ui/FormField";
+import { Select, type SelectOption } from "@/components/ui/Select";
+import { PAGE_SIZE_OPTIONS, PageRange, Pagination } from "@/components/ui/Pagination";
+import { AutoHeight } from "@/components/ui/AutoHeight";
 import {
   billingApi,
+  type AdminCatalogRowsResponse,
   type BillingInterval,
   type BillingPaymentLink,
-  type CatalogEntry,
+  type PlanRowStatus,
   type PaymentLinkDiscountType,
 } from "@/lib/billing-api";
 import { useAuthStore } from "@/auth/auth-store";
@@ -23,11 +27,46 @@ const CYCLE_LABEL = Object.fromEntries(CYCLE_OPTIONS.map((c) => [c.value, c.labe
   string
 >;
 
-const CYCLE_FILTERS = ["All Billing Cycles", ...CYCLE_OPTIONS.map((c) => c.label)];
-const STATUSES = ["All Statuses", "Active", "Archived", "No Prices Yet"];
+const STATUS_LABEL: Record<PlanRowStatus, PlanRow["status"]> = {
+  active: "Active",
+  archived: "Archived",
+  no_prices: "No Prices Yet",
+};
 
-const filterSelectClass =
-  "rounded-[9px] border border-bo-input-border bg-bo-surface px-3 py-2 font-sans text-xs font-medium text-bo-ink-soft outline-none";
+// The filter row. "" is "all" — the server leaves that filter off.
+const CYCLE_FILTER_OPTIONS: SelectOption<"" | BillingInterval>[] = [
+  { value: "", label: "All Billing Cycles" },
+  ...CYCLE_OPTIONS,
+];
+const STATUS_FILTER_OPTIONS: SelectOption<"" | PlanRowStatus>[] = [
+  { value: "", label: "All Statuses" },
+  { value: "active", label: "Active" },
+  { value: "archived", label: "Archived" },
+  { value: "no_prices", label: "No Prices Yet" },
+];
+
+const DEFAULT_PAGE_SIZE = 20;
+
+/**
+ * How the table's rows come in when they change: a fade-and-rise for a
+ * filter or page size (no direction to it), a slide from the right for a
+ * later page and from the left for an earlier one. See index.css.
+ */
+type RowsMotion = "fade" | "forward" | "back";
+const ROWS_MOTION_CLASS: Record<RowsMotion, string> = {
+  fade: "bo-content-in",
+  forward: "bo-page-in-forward",
+  back: "bo-page-in-back",
+};
+
+/**
+ * Every Plans query: the paged table rows (["billing", "admin-catalog",
+ * "rows", params]) and the full catalog the payment link form reads. One
+ * prefix, so each existing invalidation of ["billing", "admin-catalog"]
+ * refreshes both.
+ */
+const CATALOG_KEY = ["billing", "admin-catalog"] as const;
+const ROWS_KEY = ["billing", "admin-catalog", "rows"] as const;
 
 const modalCancelButtonClass =
   "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
@@ -44,6 +83,15 @@ const modalSubmitButtonClass =
 /** How long a link from the "Create Payment Link" modal works. There is no "never" — every invite link expires. */
 const EXPIRY_OPTIONS = [1, 3, 7, 14, 30] as const;
 type ExpiryDays = (typeof EXPIRY_OPTIONS)[number];
+const DISCOUNT_TYPE_OPTIONS: SelectOption<"" | PaymentLinkDiscountType>[] = [
+  { value: "", label: "None" },
+  { value: "percent", label: "% off" },
+  { value: "amount", label: "$ off" },
+];
+const EXPIRY_SELECT_OPTIONS: SelectOption<ExpiryDays>[] = EXPIRY_OPTIONS.map((days) => ({
+  value: days,
+  label: days === 1 ? "In 1 day" : `In ${days} days`,
+}));
 const DEFAULT_EXPIRY_DAYS: ExpiryDays = 7;
 
 /** "Oct 25" — when a link stops working. */
@@ -108,7 +156,7 @@ function NewProductModal({ open, onClose }: { open: boolean; onClose: () => void
         description: description.trim() || undefined,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["billing", "admin-catalog"] });
+      queryClient.invalidateQueries({ queryKey: CATALOG_KEY });
       handleClose();
     },
   });
@@ -245,7 +293,7 @@ function AddPriceModal({
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["billing", "admin-catalog"] });
+      queryClient.invalidateQueries({ queryKey: CATALOG_KEY });
       handleClose();
     },
   });
@@ -280,17 +328,13 @@ function AddPriceModal({
       </p>
 
       <Field label="BILLING CYCLE">
-        <select
+        <Select
+          label="Billing cycle"
+          size="lg"
           value={cycle}
-          onChange={(e) => setCycle(e.target.value as BillingInterval)}
-          className={formInputClass}
-        >
-          {CYCLE_OPTIONS.map((c) => (
-            <option key={c.value} value={c.value}>
-              {c.label}
-            </option>
-          ))}
-        </select>
+          options={CYCLE_OPTIONS}
+          onChange={setCycle}
+        />
       </Field>
 
       <Field label="PRICE">
@@ -433,15 +477,7 @@ function CycleChip({
  *    a link only exists once it's created, so the result(s) show after
  *    "Generate Link" instead.
  */
-function CreatePaymentLinkModal({
-  open,
-  onClose,
-  products,
-}: {
-  open: boolean;
-  onClose: () => void;
-  products: CatalogEntry[];
-}) {
+function CreatePaymentLinkModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [productId, setProductId] = useState("");
   const [selectedCycles, setSelectedCycles] = useState<Set<BillingInterval>>(new Set());
   const [seatOverride, setSeatOverride] = useState("");
@@ -451,9 +487,29 @@ function CreatePaymentLinkModal({
   const [expiresInDays, setExpiresInDays] = useState<ExpiryDays>(DEFAULT_EXPIRY_DAYS);
   const [results, setResults] = useState<BillingPaymentLink[] | null>(null);
 
+  // The whole catalog, but only while this form is open: it needs every
+  // sellable product and cadence at once, which the paged table no longer
+  // loads. Shares CATALOG_KEY, so creating or archiving anything on the
+  // page refreshes it too.
+  const catalogQuery = useQuery({
+    queryKey: CATALOG_KEY,
+    queryFn: billingApi.listAdminCatalog,
+    enabled: open,
+  });
+  const products = useMemo(() => catalogQuery.data?.products ?? [], [catalogQuery.data]);
+
   const eligibleProducts = useMemo(
     () => products.filter((p) => p.isActive && p.prices.some((price) => price.isActive)),
     [products],
+  );
+  const productOptions = useMemo<SelectOption<string>[]>(
+    () =>
+      catalogQuery.isPending
+        ? [{ value: "", label: "Loading products…" }]
+        : eligibleProducts.length === 0
+          ? [{ value: "", label: "No products with active prices" }]
+          : eligibleProducts.map((p) => ({ value: p.id, label: p.name })),
+    [catalogQuery.isPending, eligibleProducts],
   );
 
   // Default to the first eligible product once one's available — the
@@ -601,23 +657,16 @@ function CreatePaymentLinkModal({
       ) : (
         <>
           <Field label="PRODUCT">
-            <select
+            <Select
+              label="Product"
+              size="lg"
               value={productId}
-              onChange={(e) => {
-                setProductId(e.target.value);
+              options={productOptions}
+              onChange={(next) => {
+                setProductId(next);
                 setSelectedCycles(new Set());
               }}
-              className={formInputClass}
-            >
-              {eligibleProducts.length === 0 && (
-                <option value="">No products with active prices</option>
-              )}
-              {eligibleProducts.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            />
           </Field>
 
           <div className="flex flex-col gap-2">
@@ -668,18 +717,18 @@ function CreatePaymentLinkModal({
 
           <Field label="DISCOUNT">
             <div className="flex gap-2.5">
-              <select
-                value={discountType}
-                onChange={(e) => {
-                  setDiscountType(e.target.value as "" | PaymentLinkDiscountType);
-                  setDiscountValue("");
-                }}
-                className={`${formInputClass} w-[110px]`}
-              >
-                <option value="">None</option>
-                <option value="percent">% off</option>
-                <option value="amount">$ off</option>
-              </select>
+              <div className="w-[110px] shrink-0">
+                <Select
+                  label="Discount type"
+                  size="lg"
+                  value={discountType}
+                  options={DISCOUNT_TYPE_OPTIONS}
+                  onChange={(next) => {
+                    setDiscountType(next);
+                    setDiscountValue("");
+                  }}
+                />
+              </div>
               <input
                 type="text"
                 placeholder="e.g. 20"
@@ -692,17 +741,13 @@ function CreatePaymentLinkModal({
           </Field>
 
           <Field label="LINK EXPIRES">
-            <select
+            <Select
+              label="Link expires"
+              size="lg"
               value={expiresInDays}
-              onChange={(e) => setExpiresInDays(Number(e.target.value) as ExpiryDays)}
-              className={formInputClass}
-            >
-              {EXPIRY_OPTIONS.map((days) => (
-                <option key={days} value={days}>
-                  {days === 1 ? "In 1 day" : `In ${days} days`}
-                </option>
-              ))}
-            </select>
+              options={EXPIRY_SELECT_OPTIONS}
+              onChange={setExpiresInDays}
+            />
           </Field>
           <p className="-mt-3 m-0 font-sans text-[12px] text-bo-muted-5">
             The link stops working then — or as soon as a shop signs up with it, whichever comes
@@ -909,19 +954,39 @@ export function PlansPage() {
   // need plans.manage specifically, so hide them for a viewer-only role
   // rather than letting them click into an action that 403s.
   const canManage = useAuthStore((s) => s.hasPermission("plans.manage"));
-  const [productFilter, setProductFilter] = useState("All Products");
-  const [cycleFilter, setCycleFilter] = useState("All Billing Cycles");
-  const [statusFilter, setStatusFilter] = useState("All Statuses");
+  // The filters and the page go to the server; "" means "all".
+  const [productFilter, setProductFilter] = useState("");
+  const [cycleFilter, setCycleFilter] = useState<"" | BillingInterval>("");
+  const [statusFilter, setStatusFilter] = useState<"" | PlanRowStatus>("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  // Which way the rows should come in once the request just made lands.
+  const [nextMotion, setNextMotion] = useState<RowsMotion>("fade");
   const [newProductOpen, setNewProductOpen] = useState(false);
   const [createLinkOpen, setCreateLinkOpen] = useState(false);
   const [addPriceTarget, setAddPriceTarget] = useState<AddPriceTarget | null>(null);
 
-  // GET /billing/products/admin — every product/price, active or
-  // archived, unlike the public /billing/products the pricing page uses.
-  const catalogQuery = useQuery({
-    queryKey: ["billing", "admin-catalog"],
-    queryFn: billingApi.listAdminCatalog,
+  const rowsParams = useMemo(
+    () => ({
+      page,
+      pageSize,
+      productId: productFilter || undefined,
+      interval: cycleFilter || undefined,
+      status: statusFilter || undefined,
+    }),
+    [page, pageSize, productFilter, cycleFilter, statusFilter],
+  );
+
+  // GET /billing/products/admin/rows — one page of the table, filtered on
+  // the server. Every product and price, active or archived, unlike the
+  // public /billing/products the pricing page uses.
+  const rowsQuery = useQuery({
+    queryKey: [...ROWS_KEY, rowsParams],
+    queryFn: () => billingApi.listAdminCatalogRows(rowsParams),
+    // Keeps the current page on screen, dimmed, while the next one loads.
+    placeholderData: keepPreviousData,
   });
+  const data = rowsQuery.data;
 
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
 
@@ -935,14 +1000,14 @@ export function PlansPage() {
   const archivePriceMutation = useMutation({
     mutationFn: (priceId: string) => billingApi.archivePrice(priceId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["billing", "admin-catalog"] });
+      queryClient.invalidateQueries({ queryKey: CATALOG_KEY });
       setDeleteTarget(null);
     },
   });
   const archiveProductMutation = useMutation({
     mutationFn: (productId: string) => billingApi.archiveProduct(productId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["billing", "admin-catalog"] });
+      queryClient.invalidateQueries({ queryKey: CATALOG_KEY });
       setDeleteTarget(null);
     },
   });
@@ -964,7 +1029,7 @@ export function PlansPage() {
     onMutate: async ({ priceId, showOnSignup }) => {
       setSavingPriceIds((prev) => new Set(prev).add(priceId));
       // A refetch landing mid-flight would briefly paint the old value back.
-      await queryClient.cancelQueries({ queryKey: ["billing", "admin-catalog"] });
+      await queryClient.cancelQueries({ queryKey: CATALOG_KEY });
       setPriceVisibility(priceId, showOnSignup);
     },
     // Undo just this price, not a whole-cache snapshot — a snapshot taken
@@ -980,21 +1045,22 @@ export function PlansPage() {
       // after each one — an early refetch would return before the others'
       // writes and flip their switches back for a moment.
       if (queryClient.isMutating({ mutationKey: ["billing", "price-visibility"] }) <= 1) {
-        void queryClient.invalidateQueries({ queryKey: ["billing", "admin-catalog"] });
+        void queryClient.invalidateQueries({ queryKey: CATALOG_KEY });
       }
     },
   });
 
+  // Every cached page, not just this one: the same price shows up under
+  // more than one filter, and going back to an earlier page shouldn't
+  // flash the old value until its refetch lands.
   function setPriceVisibility(priceId: string, showOnSignup: boolean) {
-    queryClient.setQueryData<{ products: CatalogEntry[] }>(["billing", "admin-catalog"], (old) =>
+    queryClient.setQueriesData<AdminCatalogRowsResponse>({ queryKey: ROWS_KEY }, (old) =>
       old
         ? {
-            products: old.products.map((product) => ({
-              ...product,
-              prices: product.prices.map((price) =>
-                price.id === priceId ? { ...price, showOnSignup } : price,
-              ),
-            })),
+            ...old,
+            rows: old.rows.map((row) =>
+              row.price?.id === priceId ? { ...row, price: { ...row.price, showOnSignup } } : row,
+            ),
           }
         : old,
     );
@@ -1015,89 +1081,110 @@ export function PlansPage() {
     }
   }
 
-  // `?? []` allocates a new array on every render while the query is
-  // still loading, which would make every useMemo keyed on `products`
-  // below re-run on every render. Memoised so the identity is stable.
-  const products = useMemo(() => catalogQuery.data?.products ?? [], [catalogQuery.data]);
+  // Every product, for the filter. Two products can share a name (a
+  // renamed plan, a test copy), so a repeated name gets its key to tell
+  // them apart — the filter goes by id, not name.
+  const productList = data?.products;
+  const productFilterOptions = useMemo<SelectOption<string>[]>(() => {
+    const list = productList ?? [];
+    const seen = new Map<string, number>();
+    for (const p of list) seen.set(p.name, (seen.get(p.name) ?? 0) + 1);
+    return [
+      { value: "", label: "All Products" },
+      ...list.map((p) => ({
+        value: p.id,
+        label: (seen.get(p.name) ?? 0) > 1 ? `${p.name} (${p.key})` : p.name,
+      })),
+    ];
+  }, [productList]);
 
-  const productFilterOptions = useMemo(
-    () => ["All Products", ...products.map((p) => p.name)],
-    [products],
-  );
-
-  // One row per Stripe price, same as the mockup — except a freshly
-  // created product with no prices yet gets one placeholder row instead
-  // of silently contributing nothing. Without this, "New Product" would
-  // only be visible via the PRODUCT filter dropdown (built from `products`
-  // directly, below) and the table itself would look untouched, which
-  // reads as "did that actually work?" until a first price is added.
-  //
-  // Built with a plain loop rather than flatMap: the two branches return
-  // objects whose `status` is a different string literal, and TS won't
-  // unify flatMap's per-call return types into the right union on its
-  // own — it infers `unknown[]`. Pushing onto an explicitly-typed
-  // PlanRow[] sidesteps that.
-  const rows = useMemo<PlanRow[]>(() => {
-    const result: PlanRow[] = [];
-
-    for (const product of products) {
-      const seatLimit = product.limits.chairs ?? product.limits.locations;
-      const seats = seatLimit !== undefined ? String(seatLimit) : "Unlimited";
-
-      if (product.prices.length === 0) {
-        result.push({
-          rowKey: `product-${product.id}`,
+  // One row per Stripe price, same as the mockup — except a product with
+  // no prices yet comes back as one row with `price: null`, so a freshly
+  // created product shows up in the table instead of only in the filter.
+  const pageRows = data?.rows;
+  const rows = useMemo<PlanRow[]>(
+    () =>
+      (pageRows ?? []).map(({ product, price, status }) => {
+        const seatLimit = product.limits.chairs ?? product.limits.locations;
+        const seats = seatLimit !== undefined ? String(seatLimit) : "Unlimited";
+        const common = {
           product: product.name,
           productId: product.id,
           productKey: product.key,
           productActive: product.isActive,
-          showOnSignup: false,
-          priceDbId: null,
-          cycle: "—",
-          priceId: "—",
-          price: "—",
           seats,
-          trialDays: product.trialDays ? `${product.trialDays}d` : "—",
-          // Once the product itself has been deleted there's nothing left
-          // to call "no prices yet" — it's just archived.
-          status: product.isActive ? "No Prices Yet" : "Archived",
-        });
-        continue;
-      }
-
-      for (const price of product.prices) {
+          status: STATUS_LABEL[status],
+        };
+        if (!price) {
+          return {
+            ...common,
+            rowKey: `product-${product.id}`,
+            showOnSignup: false,
+            priceDbId: null,
+            cycle: "—",
+            priceId: "—",
+            price: "—",
+            trialDays: product.trialDays ? `${product.trialDays}d` : "—",
+          };
+        }
         const trialDays = price.trialDaysOverride ?? product.trialDays;
-        result.push({
+        return {
+          ...common,
           rowKey: price.id,
-          product: product.name,
-          productId: product.id,
-          productKey: product.key,
-          productActive: product.isActive,
           showOnSignup: price.showOnSignup,
           priceDbId: price.id,
           cycle: CYCLE_LABEL[price.billingInterval],
           priceId: price.stripePriceId,
           price: formatMoney(price.unitAmount, price.currency),
-          seats,
           trialDays: trialDays ? `${trialDays}d` : "—",
-          status: price.isActive ? "Active" : "Archived",
-        });
-      }
-    }
-
-    return result;
-  }, [products]);
-
-  const filteredRows = useMemo(
-    () =>
-      rows.filter(
-        (row) =>
-          (productFilter === "All Products" || row.product === productFilter) &&
-          (cycleFilter === "All Billing Cycles" || row.cycle === cycleFilter) &&
-          (statusFilter === "All Statuses" || row.status === statusFilter),
-      ),
-    [rows, productFilter, cycleFilter, statusFilter],
+        };
+      }),
+    [pageRows],
   );
+
+  // A page can empty under you — archive the last price on the last page
+  // while filtering by Active, say. Step back to the last page that still
+  // has rows. Only once this page's own data is in (`data.page === page`),
+  // not while the previous page is still showing as a placeholder.
+  if (data && data.page === page && data.rows.length === 0 && page > data.totalPages) {
+    setNextMotion("back");
+    setPage(data.totalPages);
+  }
+
+  /**
+   * Which page and filters the rows on screen belong to, and how they came
+   * in. Moves on only when the new page has *landed* — not when it's
+   * asked for — so the animation plays on the new rows, not over the old
+   * ones still showing (dimmed) while the request is out. A refetch of the
+   * same page (after a toggle or a delete) keeps the key, so it doesn't
+   * replay.
+   */
+  const paramsKey = `${page}|${pageSize}|${productFilter}|${cycleFilter}|${statusFilter}`;
+  const [shown, setShown] = useState<{ key: string; motion: RowsMotion }>({
+    key: "",
+    motion: "fade",
+  });
+  if (data && !rowsQuery.isPlaceholderData && shown.key !== paramsKey) {
+    setShown({ key: paramsKey, motion: nextMotion });
+  }
+
+  const filtered = productFilter !== "" || cycleFilter !== "" || statusFilter !== "";
+
+  // Each filter, and the page size, starts again from page 1 — page 4 of
+  // a narrower list is usually empty.
+  function changeFilter<T>(set: (value: T) => void) {
+    return (value: T) => {
+      set(value);
+      setNextMotion("fade");
+      setPage(1);
+    };
+  }
+
+  function goToPage(next: number) {
+    if (next === page) return;
+    setNextMotion(next > page ? "forward" : "back");
+    setPage(next);
+  }
 
   return (
     <div>
@@ -1135,37 +1222,37 @@ export function PlansPage() {
         )}
       </div>
 
-      <div className="mb-3.5 flex gap-2.5">
-        <select
-          value={productFilter}
-          onChange={(e) => setProductFilter(e.target.value)}
-          className={filterSelectClass}
-        >
-          {productFilterOptions.map((p) => (
-            <option key={p}>{p}</option>
-          ))}
-        </select>
-        <select
-          value={cycleFilter}
-          onChange={(e) => setCycleFilter(e.target.value)}
-          className={filterSelectClass}
-        >
-          {CYCLE_FILTERS.map((c) => (
-            <option key={c}>{c}</option>
-          ))}
-        </select>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className={filterSelectClass}
-        >
-          {STATUSES.map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-        </select>
+      <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex flex-wrap gap-2.5">
+          <Select
+            label="Filter by product"
+            size="sm"
+            value={productFilter}
+            options={productFilterOptions}
+            onChange={changeFilter(setProductFilter)}
+          />
+          <Select
+            label="Filter by billing cycle"
+            size="sm"
+            value={cycleFilter}
+            options={CYCLE_FILTER_OPTIONS}
+            onChange={changeFilter(setCycleFilter)}
+          />
+          <Select
+            label="Filter by status"
+            size="sm"
+            value={statusFilter}
+            options={STATUS_FILTER_OPTIONS}
+            onChange={changeFilter(setStatusFilter)}
+          />
+        </div>
+        <PageRange page={page} pageSize={pageSize} totalCount={data?.total ?? 0} noun="prices" />
       </div>
 
-      <div className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface">
+      <div
+        aria-busy={rowsQuery.isPlaceholderData}
+        className="overflow-hidden rounded-[14px] border border-bo-border bg-bo-surface"
+      >
         <div className="grid grid-cols-[1.1fr_0.9fr_1fr_0.7fr_0.6fr_0.6fr_0.7fr_0.8fr_1fr] bg-bo-table-head px-5 py-2.5 font-sans text-[12px] font-semibold text-bo-muted-4">
           <span>PRODUCT</span>
           <span>BILLING CYCLE</span>
@@ -1177,136 +1264,155 @@ export function PlansPage() {
           <span>SELF-SIGNUP</span>
           <span />
         </div>
-        {catalogQuery.isLoading ? (
-          <p className="px-5 py-6 font-sans text-sm text-bo-muted-3">Loading plans…</p>
-        ) : catalogQuery.isError ? (
-          <p className="px-5 py-6 font-sans text-sm text-bo-danger">
-            Couldn't load plans: {errorMessage(catalogQuery.error, "unknown error")}
-          </p>
-        ) : filteredRows.length === 0 ? (
-          <p className="px-5 py-6 font-sans text-sm text-bo-muted-3">
-            No prices match these filters.
-          </p>
-        ) : (
-          filteredRows.map((row, i) => {
-            return (
-              <div
-                key={row.rowKey}
-                className={`grid grid-cols-[1.1fr_0.9fr_1fr_0.7fr_0.6fr_0.6fr_0.7fr_0.8fr_1fr] items-center px-5 py-2.5 ${
-                  i > 0 ? "border-t border-bo-border-soft" : ""
-                }`}
-              >
-                <span className="font-sans text-[14px] font-semibold text-bo-ink">
-                  {row.product}
-                </span>
-                <span className="font-sans text-xs font-medium text-bo-muted-2">{row.cycle}</span>
-                <button
-                  type="button"
-                  title={row.priceId !== "—" ? `Click to copy: ${row.priceId}` : undefined}
-                  onClick={() => {
-                    if (row.priceId === "—") return;
-                    navigator.clipboard?.writeText(row.priceId).catch(() => {});
-                  }}
-                  disabled={row.priceId === "—"}
-                  className="block w-full min-w-0 truncate pr-2 text-left font-mono text-[12px] text-bo-muted-4 disabled:cursor-default"
-                >
-                  {row.priceId}
-                </button>
-                <span className="font-sans text-xs font-medium text-bo-muted-2">{row.price}</span>
-                <span className="font-sans text-xs font-medium text-bo-muted-2">{row.seats}</span>
-                <span className="font-sans text-xs font-medium text-bo-muted-2">
-                  {row.trialDays}
-                </span>
-                <StatusPill
-                  tone={
-                    row.status === "Active"
-                      ? "success"
-                      : row.status === "No Prices Yet"
-                        ? "gold"
-                        : "neutral"
-                  }
-                >
-                  {row.status}
-                </StatusPill>
-                <div>
-                  {row.priceDbId !== null && (
-                    <SelfSignupToggle
-                      label={`Show ${row.product} ${row.cycle} on the self-signup page`}
-                      checked={row.showOnSignup}
-                      disabled={!canManage || savingPriceIds.has(row.priceDbId)}
-                      onChange={() => {
-                        if (row.priceDbId === null) return;
-                        updateVisibilityMutation.mutate({
-                          priceId: row.priceDbId,
-                          showOnSignup: !row.showOnSignup,
-                        });
-                      }}
-                    />
-                  )}
-                </div>
-                <div className="flex items-center justify-end gap-2.5">
-                  {canManage && row.productActive && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setAddPriceTarget({
-                          product: row.product,
-                          productId: row.productId,
-                          productKey: row.productKey,
-                        })
-                      }
-                      className="font-sans text-xs font-semibold text-bo-gold"
+        {/* The header stays put; only the rows below it change, ease to
+            their new height, and dim while the next page loads. */}
+        <AutoHeight className={rowsQuery.isPlaceholderData ? "opacity-60" : ""}>
+          {rowsQuery.isPending ? (
+            <p className="px-5 py-6 font-sans text-sm text-bo-muted-3">Loading plans…</p>
+          ) : rowsQuery.isError && !data ? (
+            <p className="px-5 py-6 font-sans text-sm text-bo-danger">
+              Couldn't load plans: {errorMessage(rowsQuery.error, "unknown error")}
+            </p>
+          ) : (
+            <div key={shown.key} className={ROWS_MOTION_CLASS[shown.motion]}>
+              {rows.length === 0 ? (
+                <p className="m-0 px-5 py-6 font-sans text-sm text-bo-muted-3">
+                  {filtered ? "No prices match these filters." : "No plans yet."}
+                </p>
+              ) : (
+                rows.map((row, i) => {
+                  return (
+                    <div
+                      key={row.rowKey}
+                      className={`grid grid-cols-[1.1fr_0.9fr_1fr_0.7fr_0.6fr_0.6fr_0.7fr_0.8fr_1fr] items-center px-5 py-2.5 ${
+                        i > 0 ? "border-t border-bo-border-soft" : ""
+                      }`}
                     >
-                      + Price
-                    </button>
-                  )}
-                  {canManage && row.priceDbId !== null && row.status === "Active" && (
-                    <CopyLinkButton priceDbId={row.priceDbId} />
-                  )}
-                  {canManage && row.priceDbId !== null && row.status === "Active" && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setDeleteTarget({
-                          kind: "price",
-                          priceDbId: row.priceDbId as string,
-                          product: row.product,
-                          cycle: row.cycle,
-                        })
-                      }
-                      className="font-sans text-xs font-semibold text-bo-danger"
-                    >
-                      Delete
-                    </button>
-                  )}
-                  {canManage && row.priceDbId === null && row.status === "No Prices Yet" && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setDeleteTarget({
-                          kind: "product",
-                          productId: row.productId,
-                          product: row.product,
-                        })
-                      }
-                      className="font-sans text-xs font-semibold text-bo-danger"
-                    >
-                      Delete
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
+                      <span className="font-sans text-[14px] font-semibold text-bo-ink">
+                        {row.product}
+                      </span>
+                      <span className="font-sans text-xs font-medium text-bo-muted-2">
+                        {row.cycle}
+                      </span>
+                      <button
+                        type="button"
+                        title={row.priceId !== "—" ? `Click to copy: ${row.priceId}` : undefined}
+                        onClick={() => {
+                          if (row.priceId === "—") return;
+                          navigator.clipboard?.writeText(row.priceId).catch(() => {});
+                        }}
+                        disabled={row.priceId === "—"}
+                        className="block w-full min-w-0 truncate pr-2 text-left font-mono text-[12px] text-bo-muted-4 disabled:cursor-default"
+                      >
+                        {row.priceId}
+                      </button>
+                      <span className="font-sans text-xs font-medium text-bo-muted-2">
+                        {row.price}
+                      </span>
+                      <span className="font-sans text-xs font-medium text-bo-muted-2">
+                        {row.seats}
+                      </span>
+                      <span className="font-sans text-xs font-medium text-bo-muted-2">
+                        {row.trialDays}
+                      </span>
+                      <StatusPill
+                        tone={
+                          row.status === "Active"
+                            ? "success"
+                            : row.status === "No Prices Yet"
+                              ? "gold"
+                              : "neutral"
+                        }
+                      >
+                        {row.status}
+                      </StatusPill>
+                      <div>
+                        {row.priceDbId !== null && (
+                          <SelfSignupToggle
+                            label={`Show ${row.product} ${row.cycle} on the self-signup page`}
+                            checked={row.showOnSignup}
+                            disabled={!canManage || savingPriceIds.has(row.priceDbId)}
+                            onChange={() => {
+                              if (row.priceDbId === null) return;
+                              updateVisibilityMutation.mutate({
+                                priceId: row.priceDbId,
+                                showOnSignup: !row.showOnSignup,
+                              });
+                            }}
+                          />
+                        )}
+                      </div>
+                      <div className="flex items-center justify-end gap-2.5">
+                        {canManage && row.productActive && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setAddPriceTarget({
+                                product: row.product,
+                                productId: row.productId,
+                                productKey: row.productKey,
+                              })
+                            }
+                            className="font-sans text-xs font-semibold text-bo-gold"
+                          >
+                            + Price
+                          </button>
+                        )}
+                        {canManage && row.priceDbId !== null && row.status === "Active" && (
+                          <CopyLinkButton priceDbId={row.priceDbId} />
+                        )}
+                        {canManage && row.priceDbId !== null && row.status === "Active" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setDeleteTarget({
+                                kind: "price",
+                                priceDbId: row.priceDbId as string,
+                                product: row.product,
+                                cycle: row.cycle,
+                              })
+                            }
+                            className="font-sans text-xs font-semibold text-bo-danger"
+                          >
+                            Delete
+                          </button>
+                        )}
+                        {canManage && row.priceDbId === null && row.status === "No Prices Yet" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setDeleteTarget({
+                                kind: "product",
+                                productId: row.productId,
+                                product: row.product,
+                              })
+                            }
+                            className="font-sans text-xs font-semibold text-bo-danger"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+        </AutoHeight>
       </div>
 
-      <NewProductModal open={newProductOpen} onClose={() => setNewProductOpen(false)} />
-      <CreatePaymentLinkModal
-        open={createLinkOpen}
-        onClose={() => setCreateLinkOpen(false)}
-        products={products}
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        totalCount={data?.total ?? 0}
+        onPageChange={goToPage}
+        onPageSizeChange={changeFilter(setPageSize)}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
       />
+
+      <NewProductModal open={newProductOpen} onClose={() => setNewProductOpen(false)} />
+      <CreatePaymentLinkModal open={createLinkOpen} onClose={() => setCreateLinkOpen(false)} />
       <AddPriceModal target={addPriceTarget} onClose={() => setAddPriceTarget(null)} />
       <DeleteConfirmModal
         target={deleteTarget}

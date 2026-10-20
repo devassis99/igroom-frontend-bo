@@ -37,6 +37,39 @@ export interface CatalogEntry extends BillingProduct {
   prices: BillingPrice[];
 }
 
+/** A Plans-table row's status — see GET /billing/products/admin/rows. */
+export type PlanRowStatus = "active" | "archived" | "no_prices";
+
+/**
+ * One row of the Plans table: a price with the product it belongs to, or a
+ * product that has no prices yet (`price` null).
+ */
+export interface AdminCatalogRow {
+  product: Pick<BillingProduct, "id" | "key" | "name" | "isActive" | "trialDays" | "limits">;
+  price: BillingPrice | null;
+  status: PlanRowStatus;
+}
+
+export interface AdminCatalogRowsParams {
+  /** 1-indexed. */
+  page: number;
+  pageSize: number;
+  productId?: string;
+  interval?: BillingInterval;
+  status?: PlanRowStatus;
+}
+
+export interface AdminCatalogRowsResponse {
+  rows: AdminCatalogRow[];
+  /** Every product, archived too, for the product filter — the same on every page. */
+  products: Pick<BillingProduct, "id" | "key" | "name" | "isActive">[];
+  /** Rows matching the filters, across every page. */
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface CreateProductInput {
   key: string;
   name: string;
@@ -102,6 +135,18 @@ export interface CreatePaymentLinkInput {
  */
 export const billingApi = {
   listAdminCatalog: () => apiRequest<{ products: CatalogEntry[] }>("/billing/products/admin"),
+
+  /** One page of the Plans table, filtered and paged by the server. */
+  listAdminCatalogRows: (params: AdminCatalogRowsParams) => {
+    const search = new URLSearchParams({
+      page: String(params.page),
+      pageSize: String(params.pageSize),
+    });
+    if (params.productId) search.set("productId", params.productId);
+    if (params.interval) search.set("interval", params.interval);
+    if (params.status) search.set("status", params.status);
+    return apiRequest<AdminCatalogRowsResponse>(`/billing/products/admin/rows?${search}`);
+  },
 
   createProduct: (input: CreateProductInput) =>
     apiRequest<{ product: BillingProduct }>("/billing/products", {

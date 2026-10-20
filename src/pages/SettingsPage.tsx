@@ -10,13 +10,13 @@ const ROWS = [
 
 /** Rows without a real screen behind them yet route nowhere. */
 const ROW_TARGETS: Record<string, string> = {
-  "Admin roles & permissions": "/users",
+  "Admin roles & permissions": "/settings/users",
 };
 
 /**
  * Matches Backoffice.dc.html's B8 frame. Most rows are still inert (no
- * target screen exists yet); "Admin roles & permissions" now links to
- * the new User Management tab's Roles & Permissions sub-tab.
+ * target screen exists yet); "Admin roles & permissions" links to User
+ * Management, next to this page in the Settings sidebar.
  */
 export function SettingsPage() {
   const navigate = useNavigate();

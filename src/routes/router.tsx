@@ -102,18 +102,39 @@ export const router = createBrowserRouter([
             path: "referrals",
             lazy: () => import("@/pages/ReferralsPage").then((m) => ({ Component: m.default })),
           },
-          {
-            path: "users",
-            lazy: () => import("@/pages/UsersPage").then((m) => ({ Component: m.default })),
-          },
+          // Settings: Platform Settings, User Management and My Account,
+          // behind the Settings sidebar (pages/settings/SettingsLayout.tsx),
+          // which also checks each section's permission.
           {
             path: "settings",
-            lazy: () => import("@/pages/SettingsPage").then((m) => ({ Component: m.default })),
+            lazy: () =>
+              import("@/pages/settings/SettingsLayout").then((m) => ({ Component: m.default })),
+            children: [
+              {
+                index: true,
+                lazy: () =>
+                  import("@/pages/settings/SettingsLayout").then((m) => ({
+                    Component: m.SettingsIndex,
+                  })),
+              },
+              {
+                path: "platform",
+                lazy: () => import("@/pages/SettingsPage").then((m) => ({ Component: m.default })),
+              },
+              {
+                path: "users",
+                lazy: () => import("@/pages/UsersPage").then((m) => ({ Component: m.default })),
+              },
+              {
+                path: "account",
+                lazy: () => import("@/pages/AccountPage").then((m) => ({ Component: m.default })),
+              },
+            ],
           },
-          {
-            path: "account",
-            lazy: () => import("@/pages/AccountPage").then((m) => ({ Component: m.default })),
-          },
+          // Where User Management and My Account used to live, so old links
+          // and bookmarks still land in the right place.
+          { path: "users", element: <Navigate to="/settings/users" replace /> },
+          { path: "account", element: <Navigate to="/settings/account" replace /> },
         ],
       },
     ],
