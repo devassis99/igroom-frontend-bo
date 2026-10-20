@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authApi } from "@/auth/auth-api";
 import { useAuthStore } from "@/auth/auth-store";
 import { salesApi } from "@/lib/sales-api";
+import { Wordmark } from "@/components/brand/Logo";
 
 type Shape = "square" | "circle" | "gear";
 
@@ -223,8 +224,9 @@ export function AppShell() {
 
   const sidebar = (
     <aside className="flex h-full w-56 shrink-0 flex-col overflow-y-auto border-r border-bo-sidebar-border bg-bo-surface py-[22px]">
-      <p className="m-0 mb-6 px-6 font-sans text-[18px] font-semibold text-bo-ink">
-        iGroom <span className="font-sans text-[12px] font-medium text-bo-muted-5">Backoffice</span>
+      <p className="m-0 mb-6 flex items-baseline gap-2 px-6">
+        <Wordmark className="text-[24px]" />
+        <span className="font-sans text-[12px] font-medium text-bo-muted-5">Backoffice</span>
       </p>
 
       <nav className="flex flex-col gap-0.5">
@@ -310,7 +312,7 @@ export function AppShell() {
             <span className="h-0.5 w-4 rounded bg-bo-ink-soft" />
             <span className="h-0.5 w-4 rounded bg-bo-ink-soft" />
           </button>
-          <p className="m-0 font-sans text-[18px] font-semibold text-bo-ink">iGroom</p>
+          <Wordmark className="text-[22px]" />
           <span className="w-9" />
         </header>
 

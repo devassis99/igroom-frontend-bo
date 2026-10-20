@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { authApi } from "@/auth/auth-api";
 import { ApiError } from "@/lib/http";
+import { Wordmark } from "@/components/brand/Logo";
 
 /**
  * Matches Backoffice.dc.html's B0 frame. One deliberate deviation: the
@@ -43,8 +44,9 @@ export function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-bo-page px-4">
       <div className="flex w-[380px] flex-col gap-6">
         <div className="flex flex-col items-center gap-1.5 text-center">
-          <p className="m-0 font-sans text-2xl font-semibold text-bo-ink">
-            iGroom <span className="font-sans text-xs font-medium text-bo-muted-5">Backoffice</span>
+          <p className="m-0 flex items-baseline gap-2">
+            <Wordmark className="text-[34px]" />
+            <span className="font-sans text-xs font-medium text-bo-muted-5">Backoffice</span>
           </p>
           <p className="m-0 font-sans text-[14px] text-bo-muted-3">Internal access only</p>
         </div>
