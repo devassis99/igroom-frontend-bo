@@ -176,7 +176,7 @@ export function ActivityComposer({
             }}
             className={`rounded-lg px-3 py-1.5 font-sans text-xs ${
               type === t.value
-                ? "bg-bo-dark font-semibold text-bo-on-dark"
+                ? "bg-bo-dark-gradient font-semibold text-bo-on-dark"
                 : "font-medium text-bo-muted-2 hover:bg-bo-well"
             }`}
           >
@@ -236,7 +236,7 @@ export function ActivityComposer({
           value={nextStep}
           onChange={(e) => setNextStep(e.target.value)}
           placeholder="Next step — what Today should say (Send pricing and book a demo)"
-          className="w-full rounded-[10px] border border-bo-border bg-bo-surface px-3 py-2 font-sans text-xs text-bo-ink outline-none focus:border-bo-gold"
+          className="w-full rounded-[10px] border border-bo-border bg-bo-field px-3 py-2 font-sans text-xs text-bo-ink outline-none focus:border-bo-gold"
           aria-label="Next step"
           maxLength={200}
         />
@@ -295,7 +295,7 @@ export function ActivityComposer({
           className={
             withOutcomes
               ? `${primaryButtonClass} w-full sm:w-auto`
-              : "rounded-lg bg-bo-dark px-3.5 py-2 font-sans text-xs font-semibold text-bo-on-dark disabled:opacity-50"
+              : "rounded-lg bg-bo-dark-gradient px-3.5 py-2 font-sans text-xs font-semibold text-bo-on-dark disabled:opacity-50"
           }
         >
           {mutation.isPending

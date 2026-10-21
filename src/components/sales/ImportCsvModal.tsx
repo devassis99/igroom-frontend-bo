@@ -255,7 +255,7 @@ export function ImportCsvModal({ open, onClose }: { open: boolean; onClose: () =
                         setMapping(next);
                       }}
                       aria-label={`Field for ${h}`}
-                      className={`rounded-lg border border-bo-input-border bg-bo-surface px-2.5 py-1.5 font-sans text-xs font-medium ${mapping[i] === "skip" ? "text-bo-muted-5" : "text-bo-ink-soft"}`}
+                      className={`rounded-lg border border-bo-input-border bg-bo-field px-2.5 py-1.5 font-sans text-xs font-medium ${mapping[i] === "skip" ? "text-bo-muted-5" : "text-bo-ink-soft"}`}
                     >
                       {LEAD_FIELDS.map((f) => (
                         <option key={f.key} value={f.key}>
@@ -328,7 +328,7 @@ export function ImportCsvModal({ open, onClose }: { open: boolean; onClose: () =
                 <select
                   value={repId}
                   onChange={(e) => setRepId(e.target.value)}
-                  className="rounded-lg border border-bo-input-border bg-bo-surface px-2 py-1 font-sans text-xs"
+                  className="rounded-lg border border-bo-input-border bg-bo-field px-2 py-1 font-sans text-xs"
                   aria-label="Rep"
                 >
                   <option value="">Pick a rep…</option>

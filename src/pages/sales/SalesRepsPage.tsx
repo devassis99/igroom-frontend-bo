@@ -195,7 +195,7 @@ function InviteRepModal({
                       on ? territoryIds.filter((x) => x !== t.id) : [...territoryIds, t.id],
                     )
                   }
-                  className={`rounded-full px-3 py-1.5 font-sans text-xs ${on ? "bg-bo-dark font-semibold text-bo-on-dark" : "border border-bo-input-border text-bo-ink-soft"}`}
+                  className={`rounded-full px-3 py-1.5 font-sans text-xs ${on ? "bg-bo-dark-gradient font-semibold text-bo-on-dark" : "border border-bo-input-border text-bo-ink-soft"}`}
                 >
                   {t.name}
                   {t.ownerShortName && !on ? ` (${t.ownerShortName})` : ""}
@@ -640,7 +640,7 @@ function AssignPoolModal({
           <select
             value={repId}
             onChange={(e) => setRepId(e.target.value)}
-            className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3 py-2 font-sans text-[14px]"
+            className="rounded-[10px] border border-bo-input-border bg-bo-field px-3 py-2 font-sans text-[14px]"
             aria-label="Give to"
           >
             <option value="">Give to…</option>

@@ -173,7 +173,7 @@ export function AddressField({
         <ul
           id={`${id}-list`}
           aria-label="Address suggestions"
-          className="absolute top-full right-0 left-0 z-10 m-0 mt-1 list-none overflow-hidden rounded-[10px] border border-bo-border bg-bo-surface p-0 shadow-[0_12px_30px_-10px_rgba(20,15,5,0.35)]"
+          className="absolute top-full right-0 left-0 z-10 m-0 mt-1 list-none overflow-hidden rounded-[10px] border border-bo-border bg-bo-field p-0 shadow-[0_12px_30px_-10px_rgba(20,15,5,0.35)]"
         >
           {suggestions.map((s) => (
             <li key={s.id}>

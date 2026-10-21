@@ -11,7 +11,7 @@ import { ApiError } from "@/lib/http";
 const modalCancelButtonClass =
   "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 const modalSubmitButtonClass =
-  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark-gradient px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 
 function errorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiError) return error.message;

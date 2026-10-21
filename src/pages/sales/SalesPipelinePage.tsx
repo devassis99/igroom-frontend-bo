@@ -149,7 +149,7 @@ function Filters({
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search shop, owner or phone"
-        className="w-full rounded-lg border border-bo-input-border bg-bo-surface px-3 py-[7px] font-sans text-xs text-bo-ink outline-none focus:border-bo-gold sm:w-[220px]"
+        className="w-full rounded-lg border border-bo-input-border bg-bo-field px-3 py-[7px] font-sans text-xs text-bo-ink outline-none focus:border-bo-gold sm:w-[220px]"
         aria-label="Search leads"
       />
       <div className="hidden flex-1 sm:block" />
@@ -684,7 +684,7 @@ export function SalesPipelinePage() {
       <button
         type="button"
         onClick={() => setNewOpen(true)}
-        className="fixed right-5 bottom-[88px] z-30 flex h-14 items-center rounded-full bg-bo-dark px-5.5 font-sans text-[16px] font-semibold text-bo-on-dark shadow-[0_10px_24px_-8px_rgba(20,15,5,0.5)] sm:hidden"
+        className="fixed right-5 bottom-[88px] z-30 flex h-14 items-center rounded-full bg-bo-dark-gradient px-5.5 font-sans text-[16px] font-semibold text-bo-on-dark shadow-[0_10px_24px_-8px_rgba(20,15,5,0.5)] sm:hidden"
       >
         + Lead
       </button>

@@ -71,7 +71,7 @@ const ROWS_KEY = ["billing", "admin-catalog", "rows"] as const;
 const modalCancelButtonClass =
   "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 const modalSubmitButtonClass =
-  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark-gradient px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 
 /**
  * Derives a stable internal `key` from the display name (e.g. "Solo Chair"
@@ -421,7 +421,7 @@ function CopyUrlButton({ url }: { url: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="whitespace-nowrap rounded-[8px] bg-bo-dark px-3.5 py-2 font-sans text-xs font-semibold text-bo-on-dark"
+      className="whitespace-nowrap rounded-[8px] bg-bo-dark-gradient px-3.5 py-2 font-sans text-xs font-semibold text-bo-on-dark"
     >
       {copied ? "Copied!" : "Copy Link"}
     </button>

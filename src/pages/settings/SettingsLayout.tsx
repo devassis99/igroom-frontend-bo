@@ -124,7 +124,7 @@ export function SettingsLayout() {
     <div className="flex flex-col gap-5 md:-my-7 md:-ml-9 md:min-h-dvh md:flex-row md:gap-0">
       <nav
         aria-label="Settings"
-        className="hidden md:sticky md:top-0 md:flex md:h-dvh md:w-[220px] md:flex-none md:flex-col md:gap-6 md:overflow-y-auto md:border-r md:border-bo-sidebar-border md:bg-bo-table-head md:py-7"
+        className="hidden md:sticky md:top-0 md:flex md:h-dvh md:w-[220px] md:flex-none md:flex-col md:gap-6 md:overflow-y-auto md:border-r md:border-bo-sidebar-border md:bg-white md:py-7"
       >
         <p className="m-0 px-5 font-sans text-[20px] font-semibold text-bo-ink">Settings</p>
         {visible.map((section) => (
@@ -139,9 +139,11 @@ export function SettingsLayout() {
                   to={item.to}
                   className={({ isActive }) =>
                     `flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-sans text-[14px] transition-colors duration-150 ${
+                      // Pure white menu with the selection in clay, as in the
+                      // business app's Settings menu.
                       isActive
-                        ? "bg-bo-surface font-semibold text-bo-ink shadow-[0_1px_2px_rgba(20,15,5,0.08)]"
-                        : "font-medium text-bo-nav-inactive hover:bg-bo-page hover:text-bo-ink"
+                        ? "bg-brand-clay/10 font-semibold text-brand-clay-deep"
+                        : "font-medium text-bo-nav-inactive hover:bg-bo-page/60 hover:text-bo-ink"
                     }`
                   }
                 >
@@ -165,7 +167,7 @@ export function SettingsLayout() {
               className={({ isActive }) =>
                 `shrink-0 rounded-full border px-3 py-1.5 font-sans text-[12px] font-semibold whitespace-nowrap ${
                   isActive
-                    ? "border-bo-dark bg-bo-dark text-bo-on-dark"
+                    ? "border-transparent bg-bo-dark-gradient text-bo-on-dark"
                     : "border-bo-input-border bg-bo-surface text-bo-muted-2"
                 }`
               }

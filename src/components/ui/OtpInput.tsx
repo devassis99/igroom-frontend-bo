@@ -70,7 +70,7 @@ export function OtpInput({ value, onChange, onComplete, disabled }: OtpInputProp
           // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus={index === 0}
           aria-label={`Digit ${index + 1} of ${LENGTH}`}
-          className="h-[52px] w-11 rounded-[10px] border border-bo-input-border bg-bo-surface text-center font-sans text-[20px] font-semibold text-bo-ink outline-none focus:border-2 focus:border-bo-gold disabled:opacity-50"
+          className="h-[52px] w-11 rounded-[10px] border border-bo-input-border bg-bo-field text-center font-sans text-[20px] font-semibold text-bo-ink outline-none focus:border-2 focus:border-bo-gold disabled:opacity-50"
         />
       ))}
     </div>

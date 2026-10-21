@@ -40,7 +40,7 @@ const PRICE_TIER_OPTIONS: SelectOption<string>[] = [
 export const modalCancelButtonClass =
   "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 export const modalSubmitButtonClass =
-  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark-gradient px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 export const modalDangerButtonClass =
   "rounded-[10px] bg-bo-danger px-[18px] py-[11px] font-sans text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
 

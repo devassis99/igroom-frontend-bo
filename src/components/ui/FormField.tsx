@@ -13,6 +13,6 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 }
 
 export const formInputClass =
-  "rounded-[10px] border border-bo-input-border bg-bo-surface px-3.5 py-3 font-sans text-sm text-bo-ink outline-none focus:border-2 focus:border-bo-gold";
+  "rounded-[10px] border border-bo-input-border bg-bo-field px-3.5 py-3 font-sans text-sm text-bo-ink outline-none focus:border-2 focus:border-bo-gold";
 
 export default Field;

@@ -15,13 +15,29 @@
   --font-brand: "Playfair Display", Georgia, "Times New Roman", serif;
   --color-brand-ink: #211813;
   --color-brand-clay: #a75b3c;
+  /* The clay for text on a light ground: #a75b3c is about 3.9:1 there,
+     this is about 5.3:1. Selected menu items. Same value as the business
+     app's and the marketplace's. */
+  --color-brand-clay-deep: #8b4730;
   --color-brand-clay-soft: #dd9571;
   --color-brand-paper: #faf8f5;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   /* Surfaces */
   --color-bo-page: oklch(93% 0.015 65);
-  --color-bo-surface: oklch(99% 0.005 80);
+  /*
+   * Components are pure white on the page — cards, tables, the sidebars,
+   * modals, menus — the same as the business app and the marketplace.
+   * Was oklch(99% 0.005 80).
+   */
+  --color-bo-surface: #ffffff;
+  /**
+   * Form fields keep the old near-white cream (what bo-surface used to
+   * be), so a field still reads as a field inside a white card or modal:
+   * formInputClass, the sales inputClass/selectClass, Select's trigger
+   * and its option list, the one-time-code boxes, search boxes.
+   */
+  --color-bo-field: oklch(99% 0.005 80);
   --color-bo-table-head: oklch(96% 0.012 75);
 
   /* Borders */
@@ -44,6 +60,14 @@
 
   /* Dark surfaces — active nav item, primary buttons, avatar, loading screen */
   --color-bo-dark: oklch(30% 0.02 50);
+  /*
+   * The two ends of bg-bo-dark-gradient (below): espresso on the left,
+   * easing to a warm mid brown on the right. The light end still gives
+   * bo-on-dark text about 6.9:1. Same values as the business app's
+   * --color-tn-dark-from/-to.
+   */
+  --color-bo-dark-from: oklch(22% 0.018 50);
+  --color-bo-dark-to: oklch(46% 0.068 45);
   --color-bo-on-dark: oklch(98% 0.005 80);
 
   /* Accent — links, focus rings, chart lines, "in progress" status */
@@ -83,6 +107,24 @@
   --color-bo-column: oklch(95.5% 0.012 70);
   --color-bo-footer: oklch(97% 0.01 75);
   --color-bo-well: oklch(96.5% 0.01 75);
+}
+
+/*
+ * The dark brown fill as a left-to-right gradient: darkest on the left,
+ * lightening toward the right edge — the same treatment as the business
+ * app's bg-tn-dark-gradient. Used on everything you press or pick that
+ * used to be flat bg-bo-dark: primary buttons, the "+ Lead" button,
+ * selected chips and tabs, the current page number. Avatars, the
+ * loading screen, pipeline progress segments and activity dots stay flat.
+ *
+ * A utility rather than a class so it composes with Tailwind's variants.
+ * The flat colour underneath is the gradient's dark end. Hovers on these
+ * use opacity, because a hover:bg-* colour sits under the image and
+ * would never show.
+ */
+@utility bg-bo-dark-gradient {
+  background-color: var(--color-bo-dark-from);
+  background-image: linear-gradient(90deg, var(--color-bo-dark-from), var(--color-bo-dark-to));
 }
 
 body {

@@ -564,7 +564,7 @@ export function SalesLeadPage() {
             <select
               value=""
               onChange={(e) => e.target.value && changeStatus.mutate(e.target.value as LeadStatus)}
-              className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3 py-2 font-sans text-[14px] font-medium text-bo-ink-soft"
+              className="rounded-[10px] border border-bo-input-border bg-bo-field px-3 py-2 font-sans text-[14px] font-medium text-bo-ink-soft"
               aria-label="Change status"
               disabled={changeStatus.isPending}
             >

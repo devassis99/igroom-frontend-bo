@@ -307,9 +307,13 @@ export function AppShell() {
         to={item.to}
         title={rail ? label : undefined}
         className={`flex items-center gap-3 px-6 py-2.5 font-sans text-[14px] transition-colors duration-150 ${
+          // Selected in the logo's clay, as in the business app's main
+          // menu: a light clay tint, deep clay text and a clay bar on the
+          // inner edge. The hover is half-strength so it never reads
+          // stronger than the selection on the white sidebar.
           active
-            ? "bg-bo-dark font-semibold text-bo-on-dark"
-            : "font-medium text-bo-nav-inactive hover:bg-bo-page hover:text-bo-ink"
+            ? "bg-brand-clay/12 font-semibold text-brand-clay-deep shadow-[inset_3px_0_0_var(--color-brand-clay)]"
+            : "font-medium text-bo-nav-inactive hover:bg-bo-page/60 hover:text-bo-ink"
         }`}
         aria-current={active ? "page" : undefined}
       >
@@ -319,7 +323,7 @@ export function AppShell() {
           {rail && count > 0 && (
             <span
               aria-hidden
-              className={`absolute -top-1 -right-1 h-2 w-2 rounded-full ${active ? "bg-bo-gold-soft" : "bg-bo-gold"}`}
+              className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-bo-gold"
             />
           )}
         </span>
@@ -327,9 +331,7 @@ export function AppShell() {
           <span className="flex-1 truncate">{label}</span>
           {count > 0 && (
             <span
-              className={`rounded-full px-[7px] py-[2px] font-sans text-[11px] font-semibold ${
-                active ? "bg-bo-gold-soft text-bo-ink" : "bg-bo-gold-tint text-bo-gold"
-              }`}
+              className="rounded-full bg-bo-gold-tint px-[7px] py-[2px] font-sans text-[11px] font-semibold text-bo-gold"
               aria-label={`${count} due`}
             >
               {count}
@@ -422,7 +424,7 @@ export function AppShell() {
           aria-haspopup="menu"
           aria-expanded={accountMenuFrom === (inDrawer ? "drawer" : "sidebar")}
           title={rail ? `${displayName ?? "Account"} — account menu` : undefined}
-          className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-colors duration-150 hover:bg-bo-page"
+          className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-colors duration-150 hover:bg-bo-page/60"
         >
           <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-bo-dark font-sans text-xs font-semibold text-bo-on-dark">
             {displayName?.[0]?.toUpperCase() ?? "?"}
@@ -503,8 +505,17 @@ export function AppShell() {
           <span className="w-9" />
         </header>
 
+        {/*
+          overflow-x-clip, not -hidden: both cut off anything that pokes
+          out sideways, but `hidden` also makes <main> a scroll container
+          (overflow-y computes to auto), and a scroll container that
+          never scrolls — the window does — is what every `sticky`
+          inside it measures against. Settings' menu sat 28px down (main's
+          padding) and then scrolled away with the page. `clip` doesn't
+          create a scroll container, so sticky things stick to the window.
+        */}
         <main
-          className={`flex-1 overflow-x-hidden px-4 py-5 md:px-9 md:py-7 ${hasSales ? "pb-28 md:pb-7" : ""}`}
+          className={`flex-1 overflow-x-clip px-4 py-5 md:px-9 md:py-7 ${hasSales ? "pb-28 md:pb-7" : ""}`}
         >
           {/* Keyed by pathname, so every menu click remounts this and the
               new page fades and rises in (bo-route-in, index.css) instead
@@ -569,7 +580,7 @@ export function AppShell() {
                 <NavLink
                   key={tab.to}
                   to={tab.to}
-                  className={`relative flex flex-col items-center gap-1 ${active ? "text-bo-ink" : "text-bo-muted-5"}`}
+                  className={`relative flex flex-col items-center gap-1 ${active ? "text-brand-clay-deep" : "text-bo-muted-5"}`}
                 >
                   <Icon className="h-[22px] w-[22px]" />
                   <span

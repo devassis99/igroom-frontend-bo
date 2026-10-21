@@ -90,7 +90,7 @@ export function MfaSetupPage() {
             type="button"
             onClick={() => submit(code)}
             disabled={pending || code.length !== 6 || !details}
-            className="rounded-xl bg-bo-dark py-[15px] font-sans text-[16px] font-semibold text-bo-on-dark disabled:opacity-50"
+            className="rounded-xl bg-bo-dark-gradient py-[15px] font-sans text-[16px] font-semibold text-bo-on-dark disabled:opacity-50"
           >
             {pending ? "Verifying…" : "Confirm and finish setup"}
           </button>

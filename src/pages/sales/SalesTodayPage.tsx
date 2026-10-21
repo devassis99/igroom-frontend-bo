@@ -281,7 +281,7 @@ function Approvals({ data }: { data: TodayResponse }) {
             </button>
             <button
               type="button"
-              className="rounded-lg bg-bo-dark px-3 py-1.5 font-sans text-xs font-semibold text-bo-on-dark disabled:opacity-50"
+              className="rounded-lg bg-bo-dark-gradient px-3 py-1.5 font-sans text-xs font-semibold text-bo-on-dark disabled:opacity-50"
               disabled={decideInvite.isPending}
               onClick={() => decideInvite.mutate({ id: i.id, approve: true })}
             >
@@ -319,7 +319,7 @@ function Approvals({ data }: { data: TodayResponse }) {
             </button>
             <button
               type="button"
-              className="rounded-lg bg-bo-dark px-3 py-1.5 font-sans text-xs font-semibold text-bo-on-dark disabled:opacity-50"
+              className="rounded-lg bg-bo-dark-gradient px-3 py-1.5 font-sans text-xs font-semibold text-bo-on-dark disabled:opacity-50"
               disabled={decideReassignment.isPending}
               onClick={() => decideReassignment.mutate({ id: r.id, approve: true })}
             >
@@ -597,7 +597,7 @@ export function SalesTodayPage() {
       <button
         type="button"
         onClick={() => setNewOpen(true)}
-        className="fixed right-5 bottom-[88px] z-30 flex h-14 items-center rounded-full bg-bo-dark px-5.5 font-sans text-[16px] font-semibold text-bo-on-dark shadow-[0_10px_24px_-8px_rgba(20,15,5,0.5)] md:hidden"
+        className="fixed right-5 bottom-[88px] z-30 flex h-14 items-center rounded-full bg-bo-dark-gradient px-5.5 font-sans text-[16px] font-semibold text-bo-on-dark shadow-[0_10px_24px_-8px_rgba(20,15,5,0.5)] md:hidden"
       >
         + Lead
       </button>

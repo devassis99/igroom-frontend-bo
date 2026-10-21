@@ -118,7 +118,7 @@ export function DueText({
 }
 
 export const primaryButtonClass =
-  "rounded-[10px] bg-bo-dark px-4 py-2.5 font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark-gradient px-4 py-2.5 font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 export const secondaryButtonClass =
   "rounded-[10px] border border-bo-input-border bg-bo-surface px-3.5 py-2 font-sans text-[14px] font-medium text-bo-ink-soft disabled:cursor-not-allowed disabled:opacity-50";
 export const smallButtonClass =
@@ -126,9 +126,9 @@ export const smallButtonClass =
 export const linkButtonClass =
   "font-sans text-xs font-semibold text-bo-gold hover:underline disabled:opacity-50";
 export const inputClass =
-  "w-full rounded-[10px] border border-bo-input-border bg-bo-surface px-3 py-2.5 font-sans text-sm text-bo-ink outline-none focus:border-bo-gold focus:ring-1 focus:ring-bo-gold";
+  "w-full rounded-[10px] border border-bo-input-border bg-bo-field px-3 py-2.5 font-sans text-sm text-bo-ink outline-none focus:border-bo-gold focus:ring-1 focus:ring-bo-gold";
 export const selectClass =
-  "rounded-lg border border-bo-input-border bg-bo-surface px-3 py-2 font-sans text-xs font-medium text-bo-ink-soft outline-none focus:border-bo-gold";
+  "rounded-lg border border-bo-input-border bg-bo-field px-3 py-2 font-sans text-xs font-medium text-bo-ink-soft outline-none focus:border-bo-gold";
 export const labelClass =
   "font-sans text-[12px] font-medium uppercase tracking-[0.04em] text-bo-muted-1";
 
@@ -159,7 +159,7 @@ export function Chip({
       aria-pressed={active}
       className={`rounded-full px-3 py-1.5 font-sans text-xs ${
         active
-          ? "border border-bo-dark bg-bo-dark font-semibold text-bo-on-dark"
+          ? "border border-transparent bg-bo-dark-gradient font-semibold text-bo-on-dark"
           : "border border-bo-input-border bg-transparent font-medium text-bo-ink-soft hover:border-bo-muted-5"
       } disabled:opacity-40`}
     >

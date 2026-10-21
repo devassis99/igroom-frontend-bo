@@ -93,7 +93,7 @@ export function SalesMapPage() {
               setSelectedId(null);
               setSearchParams({ city: e.target.value });
             }}
-            className="rounded-[10px] border border-bo-input-border bg-bo-surface px-3 py-[7px] font-sans text-[14px] font-medium text-bo-ink-soft"
+            className="rounded-[10px] border border-bo-input-border bg-bo-field px-3 py-[7px] font-sans text-[14px] font-medium text-bo-ink-soft"
             aria-label="City"
           >
             {cities.map((c) => (

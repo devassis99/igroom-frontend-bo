@@ -283,7 +283,7 @@ export function Select<T extends string | number>({
         onBlur={() => {
           if (open) closeList();
         }}
-        className={`flex cursor-pointer items-center justify-between bg-bo-surface text-left font-sans outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
+        className={`flex cursor-pointer items-center justify-between bg-bo-field text-left font-sans outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
           size === "sm"
             ? "gap-2 rounded-[9px] border px-3 py-2 text-xs font-medium text-bo-ink-soft"
             : size === "lg"
@@ -328,7 +328,7 @@ export function Select<T extends string | number>({
         createPortal(
           <div
             ref={panelRef}
-            className={`fixed z-[60] flex flex-col overflow-hidden rounded-xl border border-bo-border bg-bo-surface ${closing ? "pointer-events-none" : ""}`}
+            className={`fixed z-[60] flex flex-col overflow-hidden rounded-xl border border-bo-border bg-bo-field ${closing ? "pointer-events-none" : ""}`}
             style={{
               top: position.top,
               bottom: position.bottom,

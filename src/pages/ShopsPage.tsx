@@ -43,7 +43,7 @@ const FILTERABLE_STATUSES: ShopStatus[] = ["trial", "active", "past_due", "suspe
 const chipClass = (active: boolean) =>
   `rounded-full border px-3 py-1.5 font-sans text-[12px] font-semibold transition-colors duration-150 ${
     active
-      ? "border-bo-dark bg-bo-dark text-bo-on-dark"
+      ? "border-transparent bg-bo-dark-gradient text-bo-on-dark"
       : "border-bo-input-border bg-bo-surface text-bo-muted-2 hover:bg-bo-page"
   }`;
 
@@ -293,7 +293,7 @@ export function ShopsPage() {
             onKeyDown={(e) => {
               if (e.key === "Escape" && searchInput) setSearchInput("");
             }}
-            className="w-full rounded-[10px] border border-bo-input-border bg-bo-surface py-2.5 pr-9 pl-9 font-sans text-[14px] text-bo-ink outline-none transition-colors duration-150 placeholder:text-bo-faint focus:border-bo-gold focus:ring-1 focus:ring-bo-gold [&::-webkit-search-cancel-button]:appearance-none"
+            className="w-full rounded-[10px] border border-bo-input-border bg-bo-field py-2.5 pr-9 pl-9 font-sans text-[14px] text-bo-ink outline-none transition-colors duration-150 placeholder:text-bo-faint focus:border-bo-gold focus:ring-1 focus:ring-bo-gold [&::-webkit-search-cancel-button]:appearance-none"
           />
           {searchInput && (
             <button

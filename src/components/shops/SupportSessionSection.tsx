@@ -15,7 +15,7 @@ import type { ShopStaff } from "@/lib/shops-api";
 const cancelButtonClass =
   "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 const submitButtonClass =
-  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark-gradient px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 
 function errorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
@@ -73,7 +73,7 @@ function ReadyState({ started, onClose }: { started: StartedSupportSession; onCl
         target="_blank"
         rel="noreferrer noopener"
         onClick={() => setOpened(true)}
-        className="rounded-[10px] bg-bo-dark px-[18px] py-[11px] text-center font-sans text-[14px] font-semibold text-bo-on-dark"
+        className="rounded-[10px] bg-bo-dark-gradient px-[18px] py-[11px] text-center font-sans text-[14px] font-semibold text-bo-on-dark"
       >
         Open {started.shopName} ↗
       </a>

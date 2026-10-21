@@ -15,17 +15,17 @@ import {
 const modalCancelButtonClass =
   "rounded-[10px] border border-bo-input-border px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-ink-soft";
 const modalSubmitButtonClass =
-  "rounded-[10px] bg-bo-dark px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[10px] bg-bo-dark-gradient px-[18px] py-[11px] font-sans text-[14px] font-semibold text-bo-on-dark disabled:cursor-not-allowed disabled:opacity-50";
 const modalDangerButtonClass =
   "rounded-[10px] bg-bo-danger px-[18px] py-[11px] font-sans text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
 const tabButtonClass = (active: boolean) =>
   `rounded-[10px] px-3.5 py-2 font-sans text-xs font-semibold ${
     active
-      ? "bg-bo-dark text-bo-on-dark"
+      ? "bg-bo-dark-gradient text-bo-on-dark"
       : "border border-bo-input-border bg-bo-surface text-bo-ink-soft"
   }`;
 const smallSelectClass =
-  "rounded-[8px] border border-bo-input-border bg-bo-surface px-2.5 py-1.5 font-sans text-xs font-medium text-bo-ink-soft outline-none disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-[8px] border border-bo-input-border bg-bo-field px-2.5 py-1.5 font-sans text-xs font-medium text-bo-ink-soft outline-none disabled:cursor-not-allowed disabled:opacity-50";
 
 function errorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
